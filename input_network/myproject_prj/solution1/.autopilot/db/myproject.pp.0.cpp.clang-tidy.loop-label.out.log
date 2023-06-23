@@ -1,0 +1,380 @@
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:28377:7: warning: Added loop label VITIS_LOOP_1213_1:   [xilinx-label-all-loops]
+      for (i = 0; i < __N - 1; ++i) {
+      ^~~
+      VITIS_LOOP_1213_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:28377:7: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:29351:5: warning: Added loop label VITIS_LOOP_676_1:   [xilinx-label-all-loops]
+    for (unsigned i = low; i != high; ++i) {
+    ^~~
+    VITIS_LOOP_676_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:29351:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:29365:5: warning: Added loop label VITIS_LOOP_690_1:   [xilinx-label-all-loops]
+    for (unsigned i = low; i != high; ++i) {
+    ^~~
+    VITIS_LOOP_690_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:29365:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:29379:5: warning: Added loop label VITIS_LOOP_704_1:   [xilinx-label-all-loops]
+    for (unsigned i = low; i != high; ++i) {
+    ^~~
+    VITIS_LOOP_704_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:29379:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:30978:7: warning: Added loop label VITIS_LOOP_1247_1:   [xilinx-label-all-loops]
+      for (i = 0; i < __N - 1; ++i) {
+      ^~~
+      VITIS_LOOP_1247_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:30978:7: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:32963:9: warning: Added loop label VITIS_LOOP_27_1:   [xilinx-label-all-loops]
+        for (unsigned i = 0; i < N; i++) {
+        ^~~
+        VITIS_LOOP_27_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:32963:9: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56133:5: warning: Added loop label VITIS_LOOP_265_1:   [xilinx-label-all-loops]
+    for (typename std::vector<src_T>::const_iterator i = in_begin; i != in_end; ++i) {
+    ^~~
+    VITIS_LOOP_265_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56133:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56143:5: warning: Added loop label VITIS_LOOP_275_1:   [xilinx-label-all-loops]
+    for (auto i = 0; i < SIZE; i++)
+    ^~~
+    VITIS_LOOP_275_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56143:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56154:5: warning: Added loop label VITIS_LOOP_286_1:   [xilinx-label-all-loops]
+    for (int i = 0; i < SIZE; i++) {
+    ^~~
+    VITIS_LOOP_286_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56154:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56161:5: warning: Added loop label VITIS_LOOP_293_1:   [xilinx-label-all-loops]
+    for (int i = 0; i < SIZE / res_T::size; i++) {
+    ^~~
+    VITIS_LOOP_293_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56161:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56163:9: warning: Added loop label VITIS_LOOP_295_2:   [xilinx-label-all-loops]
+        for (int j = 0; j < res_T::size; j++) {
+        ^~~
+        VITIS_LOOP_295_2: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56163:9: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56175:5: warning: Added loop label VITIS_LOOP_307_1:   [xilinx-label-all-loops]
+    for (int i = 0; i < SIZE / data_T::size; i++) {
+    ^~~
+    VITIS_LOOP_307_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56175:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56177:9: warning: Added loop label VITIS_LOOP_309_2:   [xilinx-label-all-loops]
+        for (int j = 0; j < data_T::size; j++) {
+        ^~~
+        VITIS_LOOP_309_2: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56177:9: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56192:5: warning: Added loop label VITIS_LOOP_324_1:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < nrows; ii++) {
+    ^~~
+    VITIS_LOOP_324_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56192:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56212:5: warning: Added loop label VITIS_LOOP_344_1:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < nrows; ii++) {
+    ^~~
+    VITIS_LOOP_344_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56212:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56213:9: warning: Added loop label VITIS_LOOP_345_2:   [xilinx-label-all-loops]
+        for (int jj = 0; jj < ncols; jj++) {
+        ^~~
+        VITIS_LOOP_345_2: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56213:9: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56228:5: warning: Added loop label VITIS_LOOP_360_1:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < N_IN; ii++) {
+    ^~~
+    VITIS_LOOP_360_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56228:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56235:5: warning: Added loop label VITIS_LOOP_367_1:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < N_IN; ii++) {
+    ^~~
+    VITIS_LOOP_367_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56235:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56358:2: warning: Added loop label VITIS_LOOP_31_1:   [xilinx-label-all-loops]
+ for (int ii = 0; ii < CONFIG_T::n_in; ii++) {
+ ^~~
+ VITIS_LOOP_31_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56358:2: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56370:5: warning: Added loop label VITIS_LOOP_43_1:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < CONFIG_T::n_in; ii++) {
+    ^~~
+    VITIS_LOOP_43_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56370:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56384:5: warning: Added loop label VITIS_LOOP_57_1:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < CONFIG_T::n_in; ii++) {
+    ^~~
+    VITIS_LOOP_57_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56384:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56411:5: warning: Added loop label VITIS_LOOP_84_1:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < N_TABLE; ii++) {
+    ^~~
+    VITIS_LOOP_84_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56411:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56441:5: warning: Added loop label VITIS_LOOP_114_1:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < CONFIG_T::n_in; ii++) {
+    ^~~
+    VITIS_LOOP_114_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56441:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56478:5: warning: Added loop label VITIS_LOOP_151_1:   [xilinx-label-all-loops]
+    for (unsigned i = 0; i < CONFIG_T::table_size; i++) {
+    ^~~
+    VITIS_LOOP_151_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56478:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56489:5: warning: Added loop label VITIS_LOOP_162_1:   [xilinx-label-all-loops]
+    for (unsigned i = 0; i < CONFIG_T::table_size; i++) {
+    ^~~
+    VITIS_LOOP_162_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56489:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56522:5: warning: Added loop label VITIS_LOOP_195_1:   [xilinx-label-all-loops]
+    for (unsigned i = 0; i < CONFIG_T::n_in; i++) {
+    ^~~
+    VITIS_LOOP_195_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56522:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56536:5: warning: Added loop label VITIS_LOOP_209_2:   [xilinx-label-all-loops]
+    for (unsigned i = 0; i < CONFIG_T::n_in; i++) {
+    ^~~
+    VITIS_LOOP_209_2: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56536:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56570:5: warning: Added loop label VITIS_LOOP_243_1:   [xilinx-label-all-loops]
+    for (unsigned i = 0; i < CONFIG_T::n_in; i++) {
+    ^~~
+    VITIS_LOOP_243_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56570:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56579:5: warning: Added loop label VITIS_LOOP_252_2:   [xilinx-label-all-loops]
+    for (unsigned i = 0; i < CONFIG_T::n_in; i++) {
+    ^~~
+    VITIS_LOOP_252_2: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56579:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56593:5: warning: Added loop label VITIS_LOOP_266_3:   [xilinx-label-all-loops]
+    for (unsigned i = 0; i < CONFIG_T::n_in; i++) {
+    ^~~
+    VITIS_LOOP_266_3: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56593:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56600:5: warning: Added loop label VITIS_LOOP_273_1:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < N_TABLE; ii++) {
+    ^~~
+    VITIS_LOOP_273_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56600:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56613:5: warning: Added loop label VITIS_LOOP_286_1:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < N_TABLE; ii++) {
+    ^~~
+    VITIS_LOOP_286_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56613:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56650:5: warning: Added loop label VITIS_LOOP_323_1:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < CONFIG_T::n_in; ii++) {
+    ^~~
+    VITIS_LOOP_323_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56650:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56655:5: warning: Added loop label VITIS_LOOP_328_2:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < CONFIG_T::n_in; ii++) {
+    ^~~
+    VITIS_LOOP_328_2: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56655:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56656:9: warning: Added loop label VITIS_LOOP_329_3:   [xilinx-label-all-loops]
+        for (int jj = 0; jj < CONFIG_T::n_in; jj++) {
+        ^~~
+        VITIS_LOOP_329_3: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56656:9: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56673:5: warning: Added loop label VITIS_LOOP_346_4:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < CONFIG_T::n_in; ii++) {
+    ^~~
+    VITIS_LOOP_346_4: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56673:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56686:5: warning: Added loop label VITIS_LOOP_359_1:   [xilinx-label-all-loops]
+    for (int i = 0; i < CONFIG_T::n_in; i++) {
+    ^~~
+    VITIS_LOOP_359_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56686:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56694:5: warning: Added loop label VITIS_LOOP_367_2:   [xilinx-label-all-loops]
+    for (int i = 1; i < CONFIG_T::n_in; i++) {
+    ^~~
+    VITIS_LOOP_367_2: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56694:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56729:5: warning: Added loop label VITIS_LOOP_402_1:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < N_TABLE; ii++) {
+    ^~~
+    VITIS_LOOP_402_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56729:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56759:5: warning: Added loop label VITIS_LOOP_432_1:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < CONFIG_T::n_in; ii++) {
+    ^~~
+    VITIS_LOOP_432_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56759:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56778:2: warning: Added loop label VITIS_LOOP_451_1:   [xilinx-label-all-loops]
+ for (int ii = 0; ii < CONFIG_T::n_in; ii++) {
+ ^~~
+ VITIS_LOOP_451_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56778:2: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56794:5: warning: Added loop label VITIS_LOOP_467_1:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < CONFIG_T::n_in; ii++) {
+    ^~~
+    VITIS_LOOP_467_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56794:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56812:5: warning: Added loop label VITIS_LOOP_485_1:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < CONFIG_T::n_in; ii++) {
+    ^~~
+    VITIS_LOOP_485_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56812:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56829:5: warning: Added loop label VITIS_LOOP_502_1:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < CONFIG_T::n_in; ii++) {
+    ^~~
+    VITIS_LOOP_502_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56829:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56846:5: warning: Added loop label VITIS_LOOP_519_1:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < N_TABLE; ii++) {
+    ^~~
+    VITIS_LOOP_519_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56846:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56876:5: warning: Added loop label VITIS_LOOP_549_1:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < CONFIG_T::n_in; ii++) {
+    ^~~
+    VITIS_LOOP_549_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56876:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56895:5: warning: Added loop label VITIS_LOOP_568_1:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < N_TABLE; ii++) {
+    ^~~
+    VITIS_LOOP_568_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56895:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56925:5: warning: Added loop label VITIS_LOOP_598_1:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < CONFIG_T::n_in; ii++) {
+    ^~~
+    VITIS_LOOP_598_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56925:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56944:5: warning: Added loop label VITIS_LOOP_617_1:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < N_TABLE; ii++) {
+    ^~~
+    VITIS_LOOP_617_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56944:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56974:5: warning: Added loop label VITIS_LOOP_647_1:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < CONFIG_T::n_in; ii++) {
+    ^~~
+    VITIS_LOOP_647_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:56974:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57001:5: warning: Added loop label VITIS_LOOP_674_1:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < N_TABLE; ii++) {
+    ^~~
+    VITIS_LOOP_674_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57001:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57030:5: warning: Added loop label VITIS_LOOP_703_1:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < CONFIG_T::n_in; ii++) {
+    ^~~
+    VITIS_LOOP_703_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57030:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57051:5: warning: Added loop label VITIS_LOOP_724_1:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < CONFIG_T::n_in; ii++) {
+    ^~~
+    VITIS_LOOP_724_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57051:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57069:5: warning: Added loop label VITIS_LOOP_742_1:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < CONFIG_T::n_in; ii++) {
+    ^~~
+    VITIS_LOOP_742_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57069:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57089:5: warning: Added loop label VITIS_LOOP_762_1:   [xilinx-label-all-loops]
+    for (int ii = 0; ii < CONFIG_T::n_in; ii++) {
+    ^~~
+    VITIS_LOOP_762_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57089:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57185:9: warning: Added loop label VITIS_LOOP_73_1:   [xilinx-label-all-loops]
+        for (int i = 0; i < N / data_T::size; i++) {
+        ^~~
+        VITIS_LOOP_73_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57185:9: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57192:13: warning: Added loop label VITIS_LOOP_80_2:   [xilinx-label-all-loops]
+            for (int j = 0; j < data_T::size; j++) {
+            ^~~
+            VITIS_LOOP_80_2: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57192:13: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57201:9: warning: Added loop label VITIS_LOOP_89_3:   [xilinx-label-all-loops]
+        for (int i = 0; i < N / data_T::size; i++) {
+        ^~~
+        VITIS_LOOP_89_3: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57201:9: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57210:13: warning: Added loop label VITIS_LOOP_98_4:   [xilinx-label-all-loops]
+            for (int j = 0; j < pack_diff; j++) {
+            ^~~
+            VITIS_LOOP_98_4: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57210:13: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57214:17: warning: Added loop label VITIS_LOOP_102_5:   [xilinx-label-all-loops]
+                for (int k = 0; k < res_T::size; k++) {
+                ^~~
+                VITIS_LOOP_102_5: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57214:17: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57225:9: warning: Added loop label VITIS_LOOP_113_6:   [xilinx-label-all-loops]
+        for (int i = 0; i < N / data_T::size; i++) {
+        ^~~
+        VITIS_LOOP_113_6: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57225:9: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57229:13: warning: Added loop label VITIS_LOOP_117_7:   [xilinx-label-all-loops]
+            for (int j = 0; j < data_T::size; j++) {
+            ^~~
+            VITIS_LOOP_117_7: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57229:13: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57253:9: warning: Added loop label VITIS_LOOP_141_1:   [xilinx-label-all-loops]
+        for (int j = 0; j < n_dupl; j++) {
+        ^~~
+        VITIS_LOOP_141_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57253:9: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57257:13: warning: Added loop label VITIS_LOOP_145_2:   [xilinx-label-all-loops]
+            for (int k = 0; k < res_T::size; k++) {
+            ^~~
+            VITIS_LOOP_145_2: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57257:13: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57276:9: warning: Added loop label VITIS_LOOP_164_1:   [xilinx-label-all-loops]
+        for (int k = 0; k < res_T::size; k++) {
+        ^~~
+        VITIS_LOOP_164_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57276:9: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57299:2: warning: Added loop label VITIS_LOOP_187_1:   [xilinx-label-all-loops]
+ for (int i = 0; i < CONFIG_T::height * CONFIG_T::width / data_T::size; i++) {
+ ^~~
+ VITIS_LOOP_187_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57299:2: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57302:9: warning: Added loop label VITIS_LOOP_190_2:   [xilinx-label-all-loops]
+        for (int j = 0; j < data_T::size; j++) {
+        ^~~
+        VITIS_LOOP_190_2: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57302:9: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57307:5: warning: Added loop label VITIS_LOOP_195_3:   [xilinx-label-all-loops]
+    for (int i = 0; i < CONFIG_T::height * CONFIG_T::width / res_T::size; i++) {
+    ^~~
+    VITIS_LOOP_195_3: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57307:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57311:9: warning: Added loop label VITIS_LOOP_199_4:   [xilinx-label-all-loops]
+        for (int j = 0; j < res_T::size; j++) {
+        ^~~
+        VITIS_LOOP_199_4: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57311:9: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57525:9: warning: Added loop label VITIS_LOOP_213_1:   [xilinx-label-all-loops]
+        for (unsigned j = 0; j < data_T::size; j++) {
+        ^~~
+        VITIS_LOOP_213_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57525:9: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57534:9: warning: Added loop label VITIS_LOOP_222_2:   [xilinx-label-all-loops]
+        for (unsigned j = 0; j < data_T::size; j++) {
+        ^~~
+        VITIS_LOOP_222_2: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57534:9: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57640:5: warning: Added loop label VITIS_LOOP_328_1:   [xilinx-label-all-loops]
+    for (int i = 0; i < CONFIG_T::n_in / res_T::size; i++) {
+    ^~~
+    VITIS_LOOP_328_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57640:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57645:9: warning: Added loop label VITIS_LOOP_333_2:   [xilinx-label-all-loops]
+        for (int i = 0; i < res_T::size; i++) {
+        ^~~
+        VITIS_LOOP_333_2: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57645:9: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57653:9: warning: Added loop label VITIS_LOOP_341_3:   [xilinx-label-all-loops]
+        for (int i = 1; i < res_T::size; i++) {
+        ^~~
+        VITIS_LOOP_341_3: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:57653:9: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:58595:5: warning: Added loop label VITIS_LOOP_14_1:   [xilinx-label-all-loops]
+    for (unsigned k = 0; k < CONFIG_T::n_out; k++) {
+    ^~~
+    VITIS_LOOP_14_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:58595:5: note: FIX-IT applied suggested code changes
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:58655:9: warning: Added loop label VITIS_LOOP_74_1:   [xilinx-label-all-loops]
+        for (int im = 0; im < CONFIG_T::n_out; im++) {
+        ^~~
+        VITIS_LOOP_74_1: 
+/oshome/denis/jlab_datascience_tracking/model_NN/input_network/myproject_prj/solution1/.autopilot/db/myproject.pp.0.cpp:58655:9: note: FIX-IT applied suggested code changes

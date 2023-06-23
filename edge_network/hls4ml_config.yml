@@ -1,0 +1,62 @@
+Backend: Vitis
+ClockPeriod: 5
+HLSConfig:
+  LayerName:
+    dense_edge_1:
+      Precision:
+        bias: fixed<16,6>
+        result: fixed<16,6>
+        weight: fixed<16,6>
+      Trace: false
+    dense_edge_1_input:
+      Precision:
+        result: fixed<16,6>
+      Trace: false
+    dense_edge_1_relu:
+      Precision:
+        result: fixed<16,6>
+      Trace: false
+    dense_edge_2:
+      Precision:
+        bias: fixed<16,6>
+        result: fixed<16,6>
+        weight: fixed<16,6>
+      Trace: false
+    dense_edge_2_relu:
+      Precision:
+        result: fixed<16,6>
+      Trace: false
+    dense_edge_3:
+      Precision:
+        bias: fixed<16,6>
+        result: fixed<16,6>
+        weight: fixed<16,6>
+      Trace: false
+    dense_edge_3_relu:
+      Precision:
+        result: fixed<16,6>
+      Trace: false
+    dense_edge_out:
+      Precision:
+        bias: fixed<16,6>
+        result: fixed<16,6>
+        weight: fixed<16,6>
+      Trace: false
+    dense_edge_out_sigmoid:
+      Precision:
+        result: fixed<16,6>
+      Trace: false
+  Model:
+    BramFactor: 1000000000
+    Precision: fixed<16,6>
+    ReuseFactor: 1
+    Strategy: Latency
+    TraceOutput: false
+IOType: io_parallel
+InputData: null
+KerasModel: !keras_model 'model_NN/edge_network/keras_model.h5'
+OutputDir: model_NN/edge_network
+OutputPredictions: null
+Part: xcu250-figd2104-2L-e
+ProjectName: myproject
+Stamp: C0B2565b

@@ -1,0 +1,57 @@
+================================================================
+== Design Size Report
+================================================================
+
+* Instructions per Function for each Compilation Phase
++--------------------------------------+-------------------------+--------------+------------------+----------------------+---------------+
+| Function                             | Location                | Compile/Link | Unroll/Inline    | Performance/Pipeline | Optimizations |
++--------------------------------------+-------------------------+--------------+------------------+----------------------+---------------+
+| + myproject                          | myproject.cpp:6         | 3,369        | 13,253           | 991                  | 866           |
+|  + dense<ap_fixed<16, 6, AP_TRN...   | nnet_dense.h:36         |   598        |                  |                      |               |
+|   + dense_latency<ap_fixed<16, 6...  | nnet_dense_latency.h:13 |   596        |                  |                      |               |
+|      product                         | nnet_mult.h:70          |   151        |                  |                      |               |
+|      cast<ap_fixed<16, 6, AP_TRN,... | nnet_mult.h:112         |     3        |                  |                      |               |
+|    relu<ap_fixed<16, 6, AP_TRN,...   | nnet_activation.h:39    |   199        |    129           |  49                  |  50           |
+|  + dense<ap_fixed<16, 6, AP_TRN...   | nnet_dense.h:36         |   598        |                  |                      |               |
+|   + dense_latency<ap_fixed<16, 6...  | nnet_dense_latency.h:13 |   596        |                  |                      |               |
+|      product                         | nnet_mult.h:70          |   151        |                  |                      |               |
+|      cast<ap_fixed<16, 6, AP_TRN,... | nnet_mult.h:112         |     3        |                  |                      |               |
+|    relu<ap_fixed<16, 6, AP_TRN,...   | nnet_activation.h:39    |   199        |    129           |  49                  |  50           |
+|  + dense<ap_fixed<16, 6, AP_TRN...   | nnet_dense.h:36         |   598        |                  |                      |               |
+|   + dense_latency<ap_fixed<16, 6...  | nnet_dense_latency.h:13 |   596        |                  |                      |               |
+|      product                         | nnet_mult.h:70          |   151        |                  |                      |               |
+|      cast<ap_fixed<16, 6, AP_TRN,... | nnet_mult.h:112         |     3        |                  |                      |               |
+|    relu<ap_fixed<16, 6, AP_TRN,...   | nnet_activation.h:39    |   199        |    129           |  49                  |  50           |
+|  + dense<ap_fixed<16, 6, AP_TRN...   | nnet_dense.h:36         |   598        |                  |                      |               |
+|   + dense_latency<ap_fixed<16, 6...  | nnet_dense_latency.h:13 |   596        |                  |                      |               |
+|      product                         | nnet_mult.h:70          |   151        |                  |                      |               |
+|      cast<ap_fixed<16, 6, AP_TRN,... | nnet_mult.h:112         |     3        |                  |                      |               |
+|    relu<ap_fixed<16, 6, AP_TRN,...   | nnet_activation.h:39    |   199        |    129           |  49                  |  50           |
+|  + dense_latency<ap_fixed<16, 6...   | nnet_dense_latency.h:13 |              |  1,072           |  46                  |  47           |
+|     cast<ap_fixed<16, 6, AP_TRN,...  | nnet_mult.h:112         |              |     24 (8 calls) |                      |               |
+|  + dense_latency<ap_fixed<16, 6...   | nnet_dense_latency.h:13 |              |  3,862           | 162                  | 163           |
+|     cast<ap_fixed<16, 6, AP_TRN,...  | nnet_mult.h:112         |              |     24 (8 calls) |                      |               |
+|  + dense_latency<ap_fixed<16, 6...   | nnet_dense_latency.h:13 |              |  3,862           | 157                  | 158           |
+|     cast<ap_fixed<16, 6, AP_TRN,...  | nnet_mult.h:112         |              |     24 (8 calls) |                      |               |
+|  + dense_latency<ap_fixed<16, 6...   | nnet_dense_latency.h:13 |              |  3,860           | 157                  | 158           |
+|     cast<ap_fixed<16, 6, AP_TRN,...  | nnet_mult.h:112         |              |     24 (8 calls) |                      |               |
++--------------------------------------+-------------------------+--------------+------------------+----------------------+---------------+
+
+* Description of Compilation Phases
++----------------------+------------------------------------------------------------+
+| Compilation Phase    | Description                                                |
++----------------------+------------------------------------------------------------+
+| Compile/Link         | All functions are compiled and linked into a single design |
+| Unroll/Inline        | After user unroll and inline pragmas are applied           |
+| Performance/Pipeline | After performance and pipeline pragmas are applied         |
+| Optimizations        | After high level synthesis optimizations                   |
++----------------------+------------------------------------------------------------+
+
+* Design Size Message Settings
++---------------------------------------------+--------+------------------------------------------------------------------+
+| Message Setting                             | Value  | Description                                                      |
++---------------------------------------------+--------+------------------------------------------------------------------+
+| config_compile -design_size_maximum_warning | 100000 | Show a warning when total design instructions exceeds this value |
++---------------------------------------------+--------+------------------------------------------------------------------+
+
+

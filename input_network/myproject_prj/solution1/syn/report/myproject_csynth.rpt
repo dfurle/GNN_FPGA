@@ -1,0 +1,201 @@
+
+
+================================================================
+== Vitis HLS Report for 'myproject'
+================================================================
+* Date:           Thu Jun 22 09:34:22 2023
+
+* Version:        2023.1 (Build 3854077 on May  4 2023)
+* Project:        myproject_prj
+* Solution:       solution1 (Vivado IP Flow Target)
+* Product family: virtexuplus
+* Target device:  xcu250-figd2104-2L-e
+
+
+================================================================
+== Performance Estimates
+================================================================
++ Timing: 
+    * Summary: 
+    +--------+---------+----------+------------+
+    |  Clock |  Target | Estimated| Uncertainty|
+    +--------+---------+----------+------------+
+    |ap_clk  |  5.00 ns|  3.803 ns|     0.62 ns|
+    +--------+---------+----------+------------+
+
++ Latency: 
+    * Summary: 
+    +---------+---------+-----------+-----------+-----+-----+---------+
+    |  Latency (cycles) |   Latency (absolute)  |  Interval | Pipeline|
+    |   min   |   max   |    min    |    max    | min | max |   Type  |
+    +---------+---------+-----------+-----------+-----+-----+---------+
+    |        4|        4|  20.000 ns|  20.000 ns|    1|    1|      yes|
+    +---------+---------+-----------+-----------+-----+-----+---------+
+
+    + Detail: 
+        * Instance: 
+        +----------------------------------------------------------------------------------+-----------------------------------------------------------------+---------+---------+----------+----------+-----+-----+---------+
+        |                                                                                  |                                                                 |  Latency (cycles) |  Latency (absolute) |  Interval | Pipeline|
+        |                                     Instance                                     |                              Module                             |   min   |   max   |    min   |    max   | min | max |   Type  |
+        +----------------------------------------------------------------------------------+-----------------------------------------------------------------+---------+---------+----------+----------+-----+-----+---------+
+        |call_ret1_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_config2_s_fu_121  |dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_config2_s  |        0|        0|      0 ns|      0 ns|    1|    1|      yes|
+        |call_ret2_relu_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_relu_config3_s_fu_127      |relu_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_relu_config3_s      |        0|        0|      0 ns|      0 ns|    1|    1|      yes|
+        |call_ret3_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_config4_s_fu_134  |dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_config4_s  |        0|        0|      0 ns|      0 ns|    1|    1|      yes|
+        |call_ret4_relu_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_relu_config5_s_fu_141      |relu_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_relu_config5_s      |        0|        0|      0 ns|      0 ns|    1|    1|      yes|
+        |call_ret5_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_config6_s_fu_151  |dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_config6_s  |        0|        0|      0 ns|      0 ns|    1|    1|      yes|
+        |call_ret6_relu_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_relu_config7_s_fu_161      |relu_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_relu_config7_s      |        0|        0|      0 ns|      0 ns|    1|    1|      yes|
+        |call_ret7_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_config8_s_fu_171  |dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_config8_s  |        0|        0|      0 ns|      0 ns|    1|    1|      yes|
+        |call_ret_relu_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_relu_config9_s_fu_181       |relu_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_relu_config9_s      |        0|        0|      0 ns|      0 ns|    1|    1|      yes|
+        +----------------------------------------------------------------------------------+-----------------------------------------------------------------+---------+---------+----------+----------+-----+-----+---------+
+
+        * Loop: 
+        N/A
+
+
+
+================================================================
+== Utilization Estimates
+================================================================
+* Summary: 
++---------------------+---------+-------+---------+---------+------+
+|         Name        | BRAM_18K|  DSP  |    FF   |   LUT   | URAM |
++---------------------+---------+-------+---------+---------+------+
+|DSP                  |        -|      -|        -|        -|     -|
+|Expression           |        -|      -|        0|        4|     -|
+|FIFO                 |        -|      -|        -|        -|     -|
+|Instance             |        -|     33|        0|     1743|     -|
+|Memory               |        -|      -|        -|        -|     -|
+|Multiplexer          |        -|      -|        -|       36|     -|
+|Register             |        -|      -|      390|        -|     -|
++---------------------+---------+-------+---------+---------+------+
+|Total                |        0|     33|      390|     1783|     0|
++---------------------+---------+-------+---------+---------+------+
+|Available SLR        |     1344|   3072|   864000|   432000|   320|
++---------------------+---------+-------+---------+---------+------+
+|Utilization SLR (%)  |        0|      1|       ~0|       ~0|     0|
++---------------------+---------+-------+---------+---------+------+
+|Available            |     5376|  12288|  3456000|  1728000|  1280|
++---------------------+---------+-------+---------+---------+------+
+|Utilization (%)      |        0|     ~0|       ~0|       ~0|     0|
++---------------------+---------+-------+---------+---------+------+
+
++ Detail: 
+    * Instance: 
+    +----------------------------------------------------------------------------------+-----------------------------------------------------------------+---------+----+---+-----+-----+
+    |                                     Instance                                     |                              Module                             | BRAM_18K| DSP| FF| LUT | URAM|
+    +----------------------------------------------------------------------------------+-----------------------------------------------------------------+---------+----+---+-----+-----+
+    |call_ret1_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_config2_s_fu_121  |dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_config2_s  |        0|   3|  0|   84|    0|
+    |call_ret3_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_config4_s_fu_134  |dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_config4_s  |        0|   5|  0|  215|    0|
+    |call_ret5_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_config6_s_fu_151  |dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_config6_s  |        0|   9|  0|  253|    0|
+    |call_ret7_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_config8_s_fu_171  |dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_config8_s  |        0|  16|  0|  355|    0|
+    |call_ret2_relu_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_relu_config3_s_fu_127      |relu_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_relu_config3_s      |        0|   0|  0|  114|    0|
+    |call_ret4_relu_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_relu_config5_s_fu_141      |relu_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_relu_config5_s      |        0|   0|  0|  228|    0|
+    |call_ret6_relu_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_relu_config7_s_fu_161      |relu_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_relu_config7_s      |        0|   0|  0|  228|    0|
+    |call_ret_relu_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_relu_config9_s_fu_181       |relu_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_relu_config9_s      |        0|   0|  0|  266|    0|
+    +----------------------------------------------------------------------------------+-----------------------------------------------------------------+---------+----+---+-----+-----+
+    |Total                                                                             |                                                                 |        0|  33|  0| 1743|    0|
+    +----------------------------------------------------------------------------------+-----------------------------------------------------------------+---------+----+---+-----+-----+
+
+    * DSP: 
+    N/A
+
+    * Memory: 
+    N/A
+
+    * FIFO: 
+    N/A
+
+    * Expression: 
+    +---------------------------+----------+----+---+----+------------+------------+
+    |       Variable Name       | Operation| DSP| FF| LUT| Bitwidth P0| Bitwidth P1|
+    +---------------------------+----------+----+---+----+------------+------------+
+    |ap_block_pp0_stage0_01001  |       and|   0|  0|   2|           1|           1|
+    |ap_enable_pp0              |       xor|   0|  0|   2|           1|           2|
+    +---------------------------+----------+----+---+----+------------+------------+
+    |Total                      |          |   0|  0|   4|           2|           3|
+    +---------------------------+----------+----+---+----+------------+------------+
+
+    * Multiplexer: 
+    +--------------------------------+----+-----------+-----+-----------+
+    |              Name              | LUT| Input Size| Bits| Total Bits|
+    +--------------------------------+----+-----------+-----+-----------+
+    |dense_in_1_input_ap_vld_in_sig  |   9|          2|    1|          2|
+    |dense_in_1_input_ap_vld_preg    |   9|          2|    1|          2|
+    |dense_in_1_input_blk_n          |   9|          2|    1|          2|
+    |dense_in_1_input_in_sig         |   9|          2|   32|         64|
+    +--------------------------------+----+-----------+-----+-----------+
+    |Total                           |  36|          8|   35|         70|
+    +--------------------------------+----+-----------+-----+-----------+
+
+    * Register: 
+    +------------------------------+----+----+-----+-----------+
+    |             Name             | FF | LUT| Bits| Const Bits|
+    +------------------------------+----+----+-----+-----------+
+    |ap_CS_fsm                     |   1|   0|    1|          0|
+    |ap_enable_reg_pp0_iter1       |   1|   0|    1|          0|
+    |ap_enable_reg_pp0_iter2       |   1|   0|    1|          0|
+    |ap_enable_reg_pp0_iter3       |   1|   0|    1|          0|
+    |ap_enable_reg_pp0_iter4       |   1|   0|    1|          0|
+    |dense_in_1_input_ap_vld_preg  |   1|   0|    1|          0|
+    |dense_in_1_input_preg         |  32|   0|   32|          0|
+    |layer3_out_1_reg_395          |  16|   0|   16|          0|
+    |layer3_out_2_reg_400          |  16|   0|   16|          0|
+    |layer3_out_reg_390            |  16|   0|   16|          0|
+    |layer5_out_1_reg_410          |  16|   0|   16|          0|
+    |layer5_out_2_reg_415          |  16|   0|   16|          0|
+    |layer5_out_3_reg_420          |  16|   0|   16|          0|
+    |layer5_out_4_reg_425          |  16|   0|   16|          0|
+    |layer5_out_5_reg_430          |  16|   0|   16|          0|
+    |layer5_out_reg_405            |  16|   0|   16|          0|
+    |layer7_out_1_reg_440          |  16|   0|   16|          0|
+    |layer7_out_2_reg_445          |  16|   0|   16|          0|
+    |layer7_out_3_reg_450          |  16|   0|   16|          0|
+    |layer7_out_4_reg_455          |  16|   0|   16|          0|
+    |layer7_out_5_reg_460          |  16|   0|   16|          0|
+    |layer7_out_reg_435            |  16|   0|   16|          0|
+    |layer8_out_1_reg_470          |  16|   0|   16|          0|
+    |layer8_out_2_reg_475          |  16|   0|   16|          0|
+    |layer8_out_3_reg_480          |  16|   0|   16|          0|
+    |layer8_out_4_reg_485          |  16|   0|   16|          0|
+    |layer8_out_5_reg_490          |  16|   0|   16|          0|
+    |layer8_out_6_reg_495          |  16|   0|   16|          0|
+    |layer8_out_reg_465            |  16|   0|   16|          0|
+    +------------------------------+----+----+-----+-----------+
+    |Total                         | 390|   0|  390|          0|
+    +------------------------------+----+----+-----+-----------+
+
+
+
+================================================================
+== Interface
+================================================================
+* Summary: 
++-------------------------+-----+-----+------------+------------------+--------------+
+|        RTL Ports        | Dir | Bits|  Protocol  |   Source Object  |    C Type    |
++-------------------------+-----+-----+------------+------------------+--------------+
+|ap_clk                   |   in|    1|  ap_ctrl_hs|         myproject|  return value|
+|ap_rst                   |   in|    1|  ap_ctrl_hs|         myproject|  return value|
+|ap_start                 |   in|    1|  ap_ctrl_hs|         myproject|  return value|
+|ap_done                  |  out|    1|  ap_ctrl_hs|         myproject|  return value|
+|ap_idle                  |  out|    1|  ap_ctrl_hs|         myproject|  return value|
+|ap_ready                 |  out|    1|  ap_ctrl_hs|         myproject|  return value|
+|dense_in_1_input_ap_vld  |   in|    1|      ap_vld|  dense_in_1_input|       pointer|
+|dense_in_1_input         |   in|   32|      ap_vld|  dense_in_1_input|       pointer|
+|layer9_out_0             |  out|   16|      ap_vld|      layer9_out_0|       pointer|
+|layer9_out_0_ap_vld      |  out|    1|      ap_vld|      layer9_out_0|       pointer|
+|layer9_out_1             |  out|   16|      ap_vld|      layer9_out_1|       pointer|
+|layer9_out_1_ap_vld      |  out|    1|      ap_vld|      layer9_out_1|       pointer|
+|layer9_out_2             |  out|   16|      ap_vld|      layer9_out_2|       pointer|
+|layer9_out_2_ap_vld      |  out|    1|      ap_vld|      layer9_out_2|       pointer|
+|layer9_out_3             |  out|   16|      ap_vld|      layer9_out_3|       pointer|
+|layer9_out_3_ap_vld      |  out|    1|      ap_vld|      layer9_out_3|       pointer|
+|layer9_out_4             |  out|   16|      ap_vld|      layer9_out_4|       pointer|
+|layer9_out_4_ap_vld      |  out|    1|      ap_vld|      layer9_out_4|       pointer|
+|layer9_out_5             |  out|   16|      ap_vld|      layer9_out_5|       pointer|
+|layer9_out_5_ap_vld      |  out|    1|      ap_vld|      layer9_out_5|       pointer|
+|layer9_out_6             |  out|   16|      ap_vld|      layer9_out_6|       pointer|
+|layer9_out_6_ap_vld      |  out|    1|      ap_vld|      layer9_out_6|       pointer|
+|layer9_out_7             |  out|   16|      ap_vld|      layer9_out_7|       pointer|
+|layer9_out_7_ap_vld      |  out|    1|      ap_vld|      layer9_out_7|       pointer|
++-------------------------+-----+-----+------------+------------------+--------------+
+

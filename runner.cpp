@@ -60,8 +60,11 @@ void runner(data_t X_arr[NHITS * NPARAMS], data_t Ro_arr[NHITS * NEDGES], data_t
   edge_network(stream_H, stream_Ro, stream_Ri, stream_e);
 
   stream_e >> e;
-  #endif
 
+  for(int i = 0; i < NEDGES; i++){
+    e_arr[i] = e[i];
+  }
+  #endif
 
   #ifdef VECTOR
   H_t H, H2;
@@ -77,14 +80,28 @@ void runner(data_t X_arr[NHITS * NPARAMS], data_t Ro_arr[NHITS * NEDGES], data_t
   edge_network(H, Ro, Ri, e);
   node_network(H, Ro, Ri, e, H2);
   // ITER #2
-  edge_network(H, Ro, Ri, e);
-  node_network(H, Ro, Ri, e, H2);
+  edge_network(H2, Ro, Ri, e);
+  node_network(H2, Ro, Ri, e, H);
   // Ending
   edge_network(H, Ro, Ri, e);
-  #endif
-
-  
   for(int i = 0; i < NEDGES; i++){
     e_arr[i] = e[i];
   }
+  #endif
+
+  #ifdef ARRAY
+  data_t H_arr[NHITS * NPARHID];
+  data_t H2_arr[NHITS * NPARHID];
+
+  input_network(X_arr, H_arr);
+  // ITER #1
+  edge_network(H_arr, Ro_arr, Ri_arr, e_arr);
+  node_network(H_arr, Ro_arr, Ri_arr, e_arr, H2_arr);
+  // ITER #2
+  edge_network(H2_arr, Ro_arr, Ri_arr, e_arr);
+  node_network(H2_arr, Ro_arr, Ri_arr, e_arr, H_arr);
+  // Ending
+  edge_network(H_arr, Ro_arr, Ri_arr, e_arr);
+  #endif
+  
 }

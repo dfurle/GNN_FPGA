@@ -35,13 +35,13 @@ void edge_network(data_t H[NHITS * NPARHID], data_t Ro[NHITS * NEDGES], data_t R
   data_t bi[NEDGES * NPARHID];
 
   for(int i = 0; i < NEDGES; i++){
-    #pragma HLS unroll factor=NEDGES
+    #pragma HLS unroll
     for(int j = 0; j < NPARHID; j++){
-      #pragma HLS unroll factor=NPARHID
+      #pragma HLS unroll
       bo[i*NPARHID + j] = 0;
       bi[i*NPARHID + j] = 0;
       for(int k = 0; k < NHITS; k++){
-        #pragma HLS unroll factor=NHITS
+        #pragma HLS unroll
         #if defined(STREAM) || defined(VECTOR)
         bo[i*NPARHID + j] += Ro[k][i] * H[k][j];
         bi[i*NPARHID + j] += Ri[k][i] * H[k][j];
@@ -57,13 +57,13 @@ void edge_network(data_t H[NHITS * NPARHID], data_t Ro[NHITS * NEDGES], data_t R
   data_t B[NEDGES * NPARHID2];
 
   for(int i = 0; i < NEDGES; i++){
-    #pragma HLS unroll factor=NEDGES
+    #pragma HLS unroll
     for(int j = 0; j < NPARHID; j++){
-      #pragma HLS unroll factor=NPARHID
+      #pragma HLS unroll
       B[i*NPARHID + j] = bo[i*NPARHID + j];
     }
     for(int j = 0; j < NPARHID; j++){
-      #pragma HLS unroll factor=NPARHID
+      #pragma HLS unroll
       B[i*NPARHID + j + NPARHID] = bi[i*NPARHID + j];
     }
   }
@@ -87,17 +87,17 @@ void edge_runner(data_t B[NEDGES * NPARHID2], data_t e[NEDGES]){
   result_t out1[N_LAYER_8];
 
   for(int i = 0; i < NEDGES; i++){
-    #pragma HLS unroll factor=NEDGES
+    #pragma HLS unroll
 
     for(int j = 0; j < N_INPUT_1_1; j++){
-      #pragma HLS unroll factor=N_INPUT_1_1
+      #pragma HLS unroll
       in1[j] = B[i*N_INPUT_1_1 + j];
     }
 
     edge_network_s(in1, out1);
 
     for(int j = 0; j < N_LAYER_8; j++){
-      #pragma HLS unroll factor=N_LAYER_8
+      #pragma HLS unroll
       e[i] = out1[j];
     }
   }
@@ -111,7 +111,7 @@ void edge_network_s(input_t in1[N_INPUT_1_1], result_t out1[N_LAYER_8]) {
     result_t layer9_out[N_LAYER_8];
 
     for(int i = 0; i < N_INPUT_1_1; i++){
-      #pragma HLS unroll factor=N_INPUT_1_1
+      #pragma HLS unroll
       dense_edge_1_input[i] = in1;
     }
 
@@ -175,7 +175,7 @@ void edge_network_s(input_t in1[N_INPUT_1_1], result_t out1[N_LAYER_8]) {
 
 
     for(int i = 0; i < N_LAYER_8; i++){
-      #pragma HLS unroll factor=N_LAYER_8
+      #pragma HLS unroll
       out1[i] = layer9_out;
     }
 }

@@ -27,7 +27,7 @@ void node_network(hls::stream<H_t>& Hin_stream, hls::stream<R_t>& Ro_stream, hls
 void node_network(H_t Hin_stream, R_t Ro_stream, R_t Ri_stream, e_t e_stream, H_t Hout_stream){
 #endif
 #ifdef ARRAY
-void node_network(data_t H[NHITS * NPARHID], data_t Ro[NHITS * NEDGES], data_t Ri[NHITS * NEDGES], data_t e[NEDGES], data_t outH[NHITS * NPARHID]){
+void node_network(data_t H[NHITS * NPARHID], data_t Ro[NHITS * NEDGES], data_t Ri[NHITS * NEDGES], data_t e[NEDGES], data_t Hout[NHITS * NPARHID]){
 #endif
 
   #ifdef STREAM

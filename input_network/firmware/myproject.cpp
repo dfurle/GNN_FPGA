@@ -42,7 +42,7 @@ void input_network(data_t X[NHITS * NPARAMS], data_t H[NHITS * NPARHID]){
       #endif
     }
 
-    input_network_s(in1, out1);
+    input_net::input_network_s(in1, out1);
 
     for(int j = 0; j < N_LAYER_8; j++){
       #pragma HLS unroll
@@ -68,6 +68,8 @@ void input_network(data_t X[NHITS * NPARAMS], data_t H[NHITS * NPARHID]){
   H_stream << H;
   #endif
 }
+
+namespace input_net{
 
 void input_network_s(input_t dense_in_1_input[N_INPUT_1_1], result_t layer9_out[N_LAYER_8]) {
 

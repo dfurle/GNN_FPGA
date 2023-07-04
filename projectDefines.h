@@ -8,8 +8,9 @@
 #define NPARAMS  2
 #define NHIDDEN  8
 
-#define STREAM
+// #define STREAM
 // #define VECTOR
+#define ARRAY
 
 // dont forget to update if NPARAMS or NHIDDEN changed
 #define NPARHID  10 //NPARAMS + NHIDDEN

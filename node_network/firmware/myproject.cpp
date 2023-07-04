@@ -20,7 +20,17 @@ void node_network_s(input_t dense_node_1_input[N_INPUT_1_1], result_t layer11_ou
 // M = tf.concat([mi, mo, X], axis=1)
 // return self.node_network(M)
 
-void node_network(data_t H[NHITS * NPARHID], data_t Ro[NHITS * NEDGES], data_t Ri[NHITS * NEDGES], data_t e[NEDGES], data_t outH[NHITS * NPARHID]){
+void node_network(hls::stream<H_t>& Hin_stream, hls::stream<R_t>& Ro_stream, hls::stream<R_t>& Ri_stream, hls::stream<e_t>& e_stream, hls::stream<H_t>& Hout_stream){
+
+  H_t H, Hout;
+  R_t Ro, Ri;
+  e_t e;
+
+  Hin_stream >> H;
+  Ro_stream >> Ro;
+  Ri_stream >> Ri;
+  e_stream >> e;
+
   data_t bo[NEDGES * NPARHID];
   data_t bi[NEDGES * NPARHID];
 
@@ -32,8 +42,8 @@ void node_network(data_t H[NHITS * NPARHID], data_t Ro[NHITS * NEDGES], data_t R
       bi[i*NPARHID + j] = 0;
       for(int k = 0; k < NHITS; k++){
         #pragma HLS unroll factor=NHITS
-        bo[i*NPARHID + j] += Ro[k*NEDGES + i] * H[k*NPARHID + j];
-        bi[i*NPARHID + j] += Ri[k*NEDGES + i] * H[k*NPARHID + j];
+        bo[i*NPARHID + j] += Ro[k][i] * H[k][j];
+        bi[i*NPARHID + j] += Ri[k][i] * H[k][j];
       }
     }
   }
@@ -49,8 +59,8 @@ void node_network(data_t H[NHITS * NPARHID], data_t Ro[NHITS * NEDGES], data_t R
       mi[i*NPARHID + j] = 0;
       for(int k = 0; k < NEDGES; k++){
         #pragma HLS unroll factor=NEDGES
-        mo[i*NPARHID + j] += Ro[i*NEDGES + k] * e[k] * bo[k*NPARHID + j];
-        mi[i*NPARHID + j] += Ri[i*NEDGES + k] * e[k] * bi[k*NPARHID + j];
+        mo[i*NPARHID + j] += Ro[i][k] * e[k] * bo[k*NPARHID + j];
+        mi[i*NPARHID + j] += Ri[i][k] * e[k] * bi[k*NPARHID + j];
       }
     }
   }
@@ -63,10 +73,12 @@ void node_network(data_t H[NHITS * NPARHID], data_t Ro[NHITS * NEDGES], data_t R
       #pragma HLS unroll factor=NPARHID
       M[i*NPARHID + j] = mi[i*NPARHID + j];
       M[i*NPARHID + j + NPARHID] = mo[i*NPARHID + j];
-      M[i*NPARHID + j + NPARHID2] = H[i*NPARHID + j];
+      M[i*NPARHID + j + NPARHID2] = H[i][j];
     }
   }
-  node_net::node_runner(M, outH);
+  node_net::node_runner(M, Hout.begin()->begin());
+
+  Hout_stream << Hout;
 }
 
 namespace node_net{

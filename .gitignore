@@ -1,2 +1,3 @@
 build
-sw_build
+build*
+*build

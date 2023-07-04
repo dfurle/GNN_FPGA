@@ -9,29 +9,42 @@ void input_network_s(input_t dense_in_1_input[N_INPUT_1_1], result_t layer9_out[
 
 }
 
-void input_network(data_t X[NHITS * NPARAMS], data_t H[NHITS * NPARHID]){
+#ifdef STREAM
+void input_network(hls::stream<X_t>& X_stream, hls::stream<H_t>& H_stream){
+#endif
+#ifdef VECTOR
+void input_network(X_t X, H_t H){
+#endif
   input_t in1[N_INPUT_1_1];
   result_t out1[N_LAYER_8];
+
+  X_t X;
+  H_t H;
+  X_stream >> X;
 
   for(int i = 0; i < NHITS; i++){
     #pragma HLS unroll factor=NHITS
 
+    // in1 = (input_t*) X[i].begin();
+
     for(int j = 0; j < N_INPUT_1_1; j++){
       #pragma HLS unroll factor=N_INPUT_1_1
-      in1[j] = X[i*N_INPUT_1_1 + j];
+      in1[j] = X[i][j];
     }
 
     input_net::input_network_s(in1, out1);
 
     for(int j = 0; j < N_LAYER_8; j++){
       #pragma HLS unroll factor=N_LAYER_8
-      H[i*(N_LAYER_8+N_INPUT_1_1) + j] = out1[j];
+      H[i][j] = out1[j];
     }
     for(int j = 0; j < N_INPUT_1_1; j++){
       #pragma HLS unroll factor=N_INPUT_1_1
-      H[i*(N_LAYER_8+N_INPUT_1_1) + j + N_LAYER_8] = in1[j];
+      H[i][j + N_LAYER_8] = in1[j];
     }
   }
+
+  H_stream << H;
 }
 
 namespace input_net{

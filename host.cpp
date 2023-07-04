@@ -47,55 +47,68 @@ int setupDevice(std::vector<cl::Device>& devices, cl::Device& device){
   return 0;
 }
 
-void setupRunGraph(cl::Program& program, cl::Context& context, cl::CommandQueue& q, float *in1, float *out1){
+void setupRunGraph(cl::Program& program, cl::Context& context, cl::CommandQueue& q, float *inX, float *inRo, float *inRi, float *out1){
 
-  cl::Kernel rkernel(program, "edge_network");
+  cl::Kernel kernel(program, "input_network");
+  // cl::Kernel inkernel(program, "input_network_1");
+  // cl::Kernel e1kernel(program, "edge_network_1");
+  // cl::Kernel n1kernel(program, "node_network_1");
+  // cl::Kernel e2kernel(program, "edge_network_2");
+  // cl::Kernel n2kernel(program, "node_network_2");
+  // cl::Kernel eoutkernel(program, "edge_network_out");
 
   // Compute the size of array in bytes
-  size_t in_H_size = sizeof(ap_fixed<16,6>) * NHITS * NPARHID;
+  size_t in_X_size = sizeof(ap_fixed<16,6>) * NHITS * NPARAMS;
   size_t in_R_size = sizeof(ap_fixed<16,6>) * NHITS * NEDGES;
+  size_t in_H_size = sizeof(ap_fixed<16,6>) * NHITS * NPARHID;
   size_t out_e_size = sizeof(ap_fixed<16,6>) * NEDGES;
 
-  std::cout << "in_H_size:  " << in_H_size << std::endl;
+  std::cout << "in_X_size:  " << in_X_size << std::endl;
   std::cout << "in_R_size: " << in_R_size << std::endl;
+  std::cout << "in_H_size:  " << in_H_size << std::endl;
   std::cout << "out_e_size: " << out_e_size << std::endl;
 
   // These commands will allocate memory on the Device. The cl::Buffer objects
   // can be used to reference the memory locations on the device.
-  cl::Buffer buffer_H(context, CL_MEM_READ_ONLY, in_H_size);
+  cl::Buffer buffer_X(context, CL_MEM_READ_ONLY, in_X_size);
   cl::Buffer buffer_Ro(context, CL_MEM_READ_ONLY, in_R_size);
   cl::Buffer buffer_Ri(context, CL_MEM_READ_ONLY, in_R_size);
+  cl::Buffer buffer_H(context, CL_MEM_READ_ONLY, in_H_size);
   cl::Buffer buffer_e(context, CL_MEM_WRITE_ONLY, out_e_size);
 
   // set the kernel Arguments
   int narg = 0;
-  rkernel.setArg(narg++, buffer_H);
-  rkernel.setArg(narg++, buffer_Ro);
-  rkernel.setArg(narg++, buffer_Ri);
-  rkernel.setArg(narg++, buffer_e);
+  kernel.setArg(narg++, buffer_X);
+  kernel.setArg(narg++, buffer_Ro);
+  kernel.setArg(narg++, buffer_Ri);
+  kernel.setArg(narg++, buffer_H);
+  kernel.setArg(narg++, buffer_e);
 
   // We then need to map our OpenCL buffers to get the pointers
-  data_t *ptr_H = (data_t *)q.enqueueMapBuffer(buffer_H, CL_TRUE, CL_MAP_WRITE, 0, in_H_size);
+  data_t *ptr_X = (data_t *)q.enqueueMapBuffer(buffer_X, CL_TRUE, CL_MAP_WRITE, 0, in_X_size);
   data_t *ptr_Ro = (data_t *)q.enqueueMapBuffer(buffer_Ro, CL_TRUE, CL_MAP_WRITE, 0, in_R_size);
   data_t *ptr_Ri = (data_t *)q.enqueueMapBuffer(buffer_Ri, CL_TRUE, CL_MAP_WRITE, 0, in_R_size);
+  data_t *ptr_H = (data_t *)q.enqueueMapBuffer(buffer_H, CL_TRUE, CL_MAP_WRITE, 0, in_H_size);
   data_t *ptr_e = (data_t *)q.enqueueMapBuffer(buffer_e, CL_TRUE, CL_MAP_READ, 0, out_e_size);
 
   std::cout << "setting input data" << std::endl;
 
   // setting input data
-  std::cout << "H: " << std::endl;
+  std::cout << "X: " << std::endl;
   for (int i = 0; i < NHITS * NPARAMS; i++) {
-    // ptr_H[i] = in1[i];
-    ptr_H[i] = i * 1.59256392;
-    std::cout << ptr_H[i] << " ";
+    ptr_X[i] = inX[i];
+    // ptr_X[i] = i * 1.59256392;
+    std::cout << ptr_X[i] << " ";
   }
   std::cout << "\n\n\n";
   std::cout << std::endl;
 
   std::cout << "Ro, Ri: " << std::endl;
   for (int i = 0; i < NHITS * NEDGES; i++) {
-    ptr_Ro[i] = i * 0.12542476;
-    ptr_Ri[i] = i * 0.78654325;
+    ptr_Ro[i] = inRo[i];
+    ptr_Ri[i] = inRi[i];
+    // ptr_Ro[i] = i * 0.12542476;
+    // ptr_Ri[i] = i * 0.78654325;
     std::cout << "(" << ptr_Ro[i] << ", " << ptr_Ri[i] << ")  ";
     if(i % NEDGES == NEDGES-1)
       std::cout << "\n\n\n";
@@ -103,14 +116,27 @@ void setupRunGraph(cl::Program& program, cl::Context& context, cl::CommandQueue&
   std::cout << "\n\n\n";
   std::cout << std::endl;
 
+  for (int i = 0; i < NHITS * NPARHID; i++) {
+    ptr_H[i] = 0;
+  }
+  for (int i = 0; i < NEDGES; i++) {
+    ptr_e[i] = 0.1256246;
+  }
+
 
   // Data will be migrated to kernel space
-  q.enqueueMigrateMemObjects({buffer_H}, 0); // 0 means from host
+  q.enqueueMigrateMemObjects({buffer_X}, 0); // 0 means from host
   q.enqueueMigrateMemObjects({buffer_Ro}, 0); // 0 means from host
   q.enqueueMigrateMemObjects({buffer_Ri}, 0); // 0 means from host
 
   // Launch the Kernel
-  q.enqueueTask(rkernel);
+  q.enqueueTask(kernel);
+  // q.enqueueTask(inkernel);
+  // q.enqueueTask(e1kernel);
+  // q.enqueueTask(n1kernel);
+  // q.enqueueTask(e2kernel);
+  // q.enqueueTask(n2kernel);
+  // q.enqueueTask(eoutkernel);
 
   // The result of the previous kernel execution will need to be retrieved in
   // order to view the results. This call will transfer the data from FPGA to
@@ -128,7 +154,7 @@ void setupRunGraph(cl::Program& program, cl::Context& context, cl::CommandQueue&
   }
   std::cout << std::endl;
 
-  q.enqueueUnmapMemObject(buffer_H, ptr_H);
+  q.enqueueUnmapMemObject(buffer_X, ptr_X);
   q.enqueueUnmapMemObject(buffer_Ro, ptr_Ro);
   q.enqueueUnmapMemObject(buffer_Ri, ptr_Ri);
   q.enqueueUnmapMemObject(buffer_e, ptr_e);
@@ -182,7 +208,9 @@ int main(int argc, char *argv[]) {
   //   in1[i] = i * 2.346547; // some random decimal to produce some decimal results
   // }
   
-  float* in1 = new float[NHITS * NPARHID];
+  float* inX = new float[NHITS * NPARAMS];
+  float* inRo = new float[NHITS * NEDGES];
+  float* inRi = new float[NHITS * NEDGES];
   
   std::ifstream file("inputs.dat");
   if(file.is_open()){
@@ -195,10 +223,23 @@ int main(int argc, char *argv[]) {
       std::cout << "read argv" << std::endl;
     }
     std::cout << "dataset: #" << dataset << std::endl;
+
     for(int d = 0; d < dataset; d++){
-      for(int i = 0; i < NHITS * NPARHID; i++){
+      for(int i = 0; i < NHITS * NPARAMS; i++){
         getline(file, sa);
-        in1[i] = std::stof(sa);
+        inX[i] = std::stof(sa);
+        // in1[i] = i * 2.346547; // some random decimal to produce some decimal results
+      }
+
+      for(int i = 0; i < NHITS * NEDGES; i++){
+        getline(file, sa);
+        inRo[i] = std::stof(sa);
+        // in1[i] = i * 2.346547; // some random decimal to produce some decimal results
+      }
+
+      for(int i = 0; i < NHITS * NEDGES; i++){
+        getline(file, sa);
+        inRi[i] = std::stof(sa);
         // in1[i] = i * 2.346547; // some random decimal to produce some decimal results
       }
     }
@@ -210,7 +251,7 @@ int main(int argc, char *argv[]) {
 
   float* out1 = new float[NEDGES];
   printf("\nRUNNING GRAPH\n\n");
-  setupRunGraph(program, context, q, in1, out1);
+  setupRunGraph(program, context, q, inX, inRo, inRi, out1);
 
   float* out = out1;
 

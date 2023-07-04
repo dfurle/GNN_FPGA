@@ -143,7 +143,6 @@ void edge_network_s(input_t in1[N_INPUT_1_1], result_t out1[N_LAYER_8]) {
       #pragma HLS unroll factor=N_LAYER_8
       out1[i] = layer9_out;
     }
-
 }
 
 }

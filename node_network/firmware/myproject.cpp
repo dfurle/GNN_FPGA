@@ -20,20 +20,46 @@ void node_network_s(input_t dense_node_1_input[N_INPUT_1_1], result_t layer11_ou
 // M = tf.concat([mi, mo, X], axis=1)
 // return self.node_network(M)
 
+#ifdef STREAM
+void node_network(hls::stream<H_t>& Hin_stream, hls::stream<R_t>& Ro_stream, hls::stream<R_t>& Ri_stream, hls::stream<e_t>& e_stream, hls::stream<H_t>& Hout_stream){
+#endif
+#ifdef VECTOR
+void node_network(H_t Hin_stream, R_t Ro_stream, R_t Ri_stream, e_t e_stream, H_t Hout_stream){
+#endif
+#ifdef ARRAY
 void node_network(data_t H[NHITS * NPARHID], data_t Ro[NHITS * NEDGES], data_t Ri[NHITS * NEDGES], data_t e[NEDGES], data_t outH[NHITS * NPARHID]){
+#endif
+
+  #ifdef STREAM
+  H_t H, Hout;
+  R_t Ro, Ri;
+  e_t e;
+
+  Hin_stream >> H;
+  Ro_stream >> Ro;
+  Ri_stream >> Ri;
+  e_stream >> e;
+  #endif
+
   data_t bo[NEDGES * NPARHID];
   data_t bi[NEDGES * NPARHID];
 
   for(int i = 0; i < NEDGES; i++){
-    #pragma HLS unroll factor=NEDGES
+    #pragma HLS unroll
     for(int j = 0; j < NPARHID; j++){
-      #pragma HLS unroll factor=NPARHID
+      #pragma HLS unroll
       bo[i*NPARHID + j] = 0;
       bi[i*NPARHID + j] = 0;
       for(int k = 0; k < NHITS; k++){
-        #pragma HLS unroll factor=NHITS
+        #pragma HLS unroll
+        #if defined(STREAM) || defined(VECTOR)
+        bo[i*NPARHID + j] += Ro[k][i] * H[k][j];
+        bi[i*NPARHID + j] += Ri[k][i] * H[k][j];
+        #endif
+        #ifdef ARRAY
         bo[i*NPARHID + j] += Ro[k*NEDGES + i] * H[k*NPARHID + j];
         bi[i*NPARHID + j] += Ri[k*NEDGES + i] * H[k*NPARHID + j];
+        #endif
       }
     }
   }
@@ -42,15 +68,21 @@ void node_network(data_t H[NHITS * NPARHID], data_t Ro[NHITS * NEDGES], data_t R
   data_t mi[NHITS * NPARHID];
 
   for(int i = 0; i < NHITS; i++){
-    #pragma HLS unroll factor=NHITS
+    #pragma HLS unroll
     for(int j = 0; j < NPARHID; j++){
-      #pragma HLS unroll factor=NPARHID
+      #pragma HLS unroll
       mo[i*NPARHID + j] = 0;
       mi[i*NPARHID + j] = 0;
       for(int k = 0; k < NEDGES; k++){
-        #pragma HLS unroll factor=NEDGES
+        #pragma HLS unroll
+        #if defined(STREAM) || defined(VECTOR)
+        mo[i*NPARHID + j] += Ro[i][k] * e[k] * bo[k*NPARHID + j];
+        mi[i*NPARHID + j] += Ri[i][k] * e[k] * bi[k*NPARHID + j];
+        #endif
+        #ifdef ARRAY
         mo[i*NPARHID + j] += Ro[i*NEDGES + k] * e[k] * bo[k*NPARHID + j];
         mi[i*NPARHID + j] += Ri[i*NEDGES + k] * e[k] * bi[k*NPARHID + j];
+        #endif
       }
     }
   }
@@ -58,15 +90,30 @@ void node_network(data_t H[NHITS * NPARHID], data_t Ro[NHITS * NEDGES], data_t R
   data_t M[NHITS * NPARHID3];
 
   for(int i = 0; i < NHITS; i++){
-    #pragma HLS unroll factor=NHITS
+    #pragma HLS unroll
     for(int j = 0; j < NPARHID; j++){
-      #pragma HLS unroll factor=NPARHID
+      #pragma HLS unroll
       M[i*NPARHID + j] = mi[i*NPARHID + j];
       M[i*NPARHID + j + NPARHID] = mo[i*NPARHID + j];
+      #if defined(STREAM) || defined(VECTOR)
+      M[i*NPARHID + j + NPARHID2] = H[i][j];
+      #endif
+      #ifdef ARRAY
       M[i*NPARHID + j + NPARHID2] = H[i*NPARHID + j];
+      #endif
     }
   }
-  node_net::node_runner(M, outH);
+
+  #if defined(STREAM) || defined(VECTOR)
+  node_net::node_runner(M, Hout.begin()->begin());
+  #endif
+  #ifdef ARRAY
+  node_net::node_runner(M, Hout);
+  #endif
+
+  #ifdef STREAM
+  Hout_stream << Hout;
+  #endif
 }
 
 namespace node_net{

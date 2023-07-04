@@ -11,7 +11,26 @@ void edge_network_s(input_t in1[N_INPUT_1_1], result_t out1[N_LAYER_8]);
 
 }
 
+#ifdef STREAM
+void edge_network(hls::stream<H_t>& H_stream, hls::stream<R_t>& Ro_stream, hls::stream<R_t>& Ri_stream, hls::stream<e_t>& e_stream){
+#endif
+#ifdef VECTOR
+void edge_network(H_t H, R_t Ro, R_t Ri, e_t e){
+#endif
+#ifdef ARRAY
 void edge_network(data_t H[NHITS * NPARHID], data_t Ro[NHITS * NEDGES], data_t Ri[NHITS * NEDGES], data_t e[NEDGES]){
+#endif
+
+  #ifdef STREAM
+  H_t H;
+  R_t Ro, Ri;
+  e_t e;
+
+  H_stream >> H;
+  Ro_stream >> Ro;
+  Ri_stream >> Ri;
+  #endif
+
   data_t bo[NEDGES * NPARHID];
   data_t bi[NEDGES * NPARHID];
 
@@ -23,8 +42,14 @@ void edge_network(data_t H[NHITS * NPARHID], data_t Ro[NHITS * NEDGES], data_t R
       bi[i*NPARHID + j] = 0;
       for(int k = 0; k < NHITS; k++){
         #pragma HLS unroll factor=NHITS
+        #if defined(STREAM) || defined(VECTOR)
+        bo[i*NPARHID + j] += Ro[k][i] * H[k][j];
+        bi[i*NPARHID + j] += Ri[k][i] * H[k][j];
+        #endif
+        #ifdef ARRAY
         bo[i*NPARHID + j] += Ro[k*NEDGES + i] * H[k*NPARHID + j];
         bi[i*NPARHID + j] += Ri[k*NEDGES + i] * H[k*NPARHID + j];
+        #endif
       }
     }
   }
@@ -42,7 +67,17 @@ void edge_network(data_t H[NHITS * NPARHID], data_t Ro[NHITS * NEDGES], data_t R
       B[i*NPARHID + j + NPARHID] = bi[i*NPARHID + j];
     }
   }
+
+  #if defined(STREAM) || defined(VECTOR)
+  edge_net::edge_runner(B, e.begin());
+  #endif
+  #ifdef ARRAY
   edge_net::edge_runner(B, e);
+  #endif
+
+  #ifdef STREAM
+  e_stream << e;
+  #endif
 }
 
 namespace edge_net{

@@ -1,7 +1,7 @@
-#include <iostream>
+// #include <iostream>
 
-#include "myproject.h"
-#include "parameters.h"
+#include "myproject_e.h"
+#include "parameters_e.h"
 
 
 namespace edge_net{
@@ -15,11 +15,15 @@ void edge_network_s(input_t in1[N_INPUT_1_1], result_t out1[N_LAYER_8]);
 void edge_network(hls::stream<H_t>& H_stream, hls::stream<R_t>& Ro_stream, hls::stream<R_t>& Ri_stream, hls::stream<e_t>& e_stream){
 #endif
 #ifdef VECTOR
-void edge_network(H_t H, R_t Ro, R_t Ri, e_t e){
+void edge_network(H_t& H, R_t& Ro, R_t& Ri, e_t& e){
 #endif
 #ifdef ARRAY
 void edge_network(data_t H[NHITS * NPARHID], data_t Ro[NHITS * NEDGES], data_t Ri[NHITS * NEDGES], data_t e[NEDGES]){
 #endif
+
+  #ifdef DISABLE_EDGE
+
+  #else
 
   #ifdef STREAM
   H_t H;
@@ -35,13 +39,13 @@ void edge_network(data_t H[NHITS * NPARHID], data_t Ro[NHITS * NEDGES], data_t R
   data_t bi[NEDGES * NPARHID];
 
   for(int i = 0; i < NEDGES; i++){
-    #pragma HLS unroll
+    // #pragma HLS unroll
     for(int j = 0; j < NPARHID; j++){
-      #pragma HLS unroll
+      // #pragma HLS unroll
       bo[i*NPARHID + j] = 0;
       bi[i*NPARHID + j] = 0;
       for(int k = 0; k < NHITS; k++){
-        #pragma HLS unroll
+        // #pragma HLS unroll
         #if defined(STREAM) || defined(VECTOR)
         bo[i*NPARHID + j] += Ro[k][i] * H[k][j];
         bi[i*NPARHID + j] += Ri[k][i] * H[k][j];
@@ -57,13 +61,13 @@ void edge_network(data_t H[NHITS * NPARHID], data_t Ro[NHITS * NEDGES], data_t R
   data_t B[NEDGES * NPARHID2];
 
   for(int i = 0; i < NEDGES; i++){
-    #pragma HLS unroll
+    // #pragma HLS unroll
     for(int j = 0; j < NPARHID; j++){
-      #pragma HLS unroll
+      // #pragma HLS unroll
       B[i*NPARHID + j] = bo[i*NPARHID + j];
     }
     for(int j = 0; j < NPARHID; j++){
-      #pragma HLS unroll
+      // #pragma HLS unroll
       B[i*NPARHID + j + NPARHID] = bi[i*NPARHID + j];
     }
   }
@@ -78,26 +82,28 @@ void edge_network(data_t H[NHITS * NPARHID], data_t Ro[NHITS * NEDGES], data_t R
   #ifdef STREAM
   e_stream << e;
   #endif
+
+  #endif
 }
 
 namespace edge_net{
 
 void edge_runner(data_t B[NEDGES * NPARHID2], data_t e[NEDGES]){
-  input_t in1[N_INPUT_1_1];
-  result_t out1[N_LAYER_8];
+  edge_net::input_t in1[N_INPUT_1_1];
+  edge_net::result_t out1[N_LAYER_8];
 
   for(int i = 0; i < NEDGES; i++){
-    #pragma HLS unroll
+    // #pragma HLS unroll
 
     for(int j = 0; j < N_INPUT_1_1; j++){
-      #pragma HLS unroll
+      // #pragma HLS unroll
       in1[j] = B[i*N_INPUT_1_1 + j];
     }
 
     edge_network_s(in1, out1);
 
     for(int j = 0; j < N_LAYER_8; j++){
-      #pragma HLS unroll
+      // #pragma HLS unroll
       e[i] = out1[j];
     }
   }
@@ -176,7 +182,7 @@ void edge_network_s(input_t in1[N_INPUT_1_1], result_t out1[N_LAYER_8]) {
 
     for(int i = 0; i < N_LAYER_8; i++){
       #pragma HLS unroll
-      out1[i] = layer9_out;
+      out1[i] = layer9_out[i];
     }
 }
 

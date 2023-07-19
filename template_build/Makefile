@@ -25,39 +25,50 @@ host.exe: $(HOST_SRC)
 	g++ -g -std=c++17 -Wall -O0 $(HOST_SRC) -o ./host.exe -I${XILINX_XRT}/include/ -I${XILINX_HLS}/include/ -L${XILINX_XRT}/lib ${LDFLAGS}
 	
 INPUT_DIR := ${WORK}/input_network
-INPUT_SRC := ${INPUT_DIR}/firmware/myproject.cpp
+INPUT_SRC := ${INPUT_DIR}/firmware/myproject_i.cpp
 INPUT_INCLUDE := -I${INPUT_DIR} -I${WORK} -I${INPUT_DIR}/firmware
-INPUT_KERNEL := input_network
-$(INPUT_KERNEL).xo: ${INPUT_SRC}
-	mkdir -p ./kernels
-	cd ./kernels; \
-	v++ -c -t $(EMU_MODE) --platform $(PART) --config ${INPUT_DIR}/config.cfg -k $(INPUT_KERNEL) $(INPUT_INCLUDE) ${INPUT_SRC} -o $(INPUT_KERNEL).xo; \
-	mv ${INPUT_KERNEL}.xo ..
+# INPUT_KERNEL := input_network
+# $(INPUT_KERNEL).xo: ${INPUT_SRC}
+# 	mkdir -p ./kernels
+# 	cd ./kernels; \
+# 	v++ -c -t $(EMU_MODE) --platform $(PART) --config ${INPUT_DIR}/config.cfg -k ${INPUT_KERNEL} $(INPUT_INCLUDE) ${INPUT_SRC} -o ${INPUT_KERNEL}.xo; \
+# 	mv ${INPUT_KERNEL}.xo ..
 	
 EDGE_DIR := ${WORK}/edge_network
-EDGE_SRC := ${EDGE_DIR}/firmware/myproject.cpp
+EDGE_SRC := ${EDGE_DIR}/firmware/myproject_e.cpp
 EDGE_INCLUDE := -I${EDGE_DIR} -I${WORK} -I${EDGE_DIR}/firmware
-EDGE_KERNEL := edge_network
-${EDGE_KERNEL}.xo: ${EDGE_SRC}
-	mkdir -p ./kernels
-	cd ./kernels; \
-	v++ -c -t $(EMU_MODE) --platform $(PART) --config ${EDGE_DIR}/config.cfg -k ${EDGE_KERNEL} $(EDGE_INCLUDE) ${EDGE_SRC} -o ${EDGE_KERNEL}.xo; \
-	mv ${EDGE_KERNEL}.xo ..
+# EDGE_KERNEL := edge_network
+# ${EDGE_KERNEL}.xo: ${EDGE_SRC}
+# 	mkdir -p ./kernels
+# 	cd ./kernels; \
+# 	v++ -c -t $(EMU_MODE) --platform $(PART) --config ${EDGE_DIR}/config.cfg -k ${EDGE_KERNEL} $(EDGE_INCLUDE) ${EDGE_SRC} -o ${EDGE_KERNEL}.xo; \
+# 	mv ${EDGE_KERNEL}.xo ..
 
 NODE_DIR := ${WORK}/node_network
-NODE_SRC := ${NODE_DIR}/firmware/myproject.cpp
+NODE_SRC := ${NODE_DIR}/firmware/myproject_n.cpp
 NODE_INCLUDE := -I${NODE_DIR} -I${WORK} -I${NODE_DIR}/firmware
-NODE_KERNEL := node_network
-${NODE_KERNEL}.xo: ${NODE_SRC}
+# NODE_KERNEL := node_network
+# ${NODE_KERNEL}.xo: ${NODE_SRC}
+# 	mkdir -p ./kernels
+# 	cd ./kernels; \
+# 	v++ -c -t $(EMU_MODE) --platform $(PART) --config ${NODE_DIR}/config.cfg -k ${NODE_KERNEL} $(NODE_INCLUDE) ${NODE_SRC} -o ${NODE_KERNEL}.xo; \
+# 	mv ${NODE_KERNEL}.xo ..
+
+RUNNER_SRC := ${WORK}/runner.cpp ${INPUT_SRC} ${NODE_SRC} ${EDGE_SRC}
+RUNNER_INCLUDE := -I${WORK} -I${INPUT_DIR}/firmware -I${NODE_DIR}/firmware -I${EDGE_DIR}/firmware
+RUNNER_KERNEL := runner
+KERNEL_CFG := ${WORK}/hls_config.cfg
+${RUNNER_KERNEL}.xo: ${RUNNER_SRC}
 	mkdir -p ./kernels
 	cd ./kernels; \
-	v++ -c -t $(EMU_MODE) --platform $(PART) --config ${NODE_DIR}/config.cfg -k ${NODE_KERNEL} $(NODE_INCLUDE) ${NODE_SRC} -o ${NODE_KERNEL}.xo; \
-	mv ${NODE_KERNEL}.xo ..
+	v++ -c --mode hls --config ${KERNEL_CFG}; \
+	mv ${RUNNER_KERNEL}/${RUNNER_KERNEL}.xo ..
 
-${HLS_NAME}.xclbin: $(INPUT_KERNEL).xo ${EDGE_KERNEL}.xo ${NODE_KERNEL}.xo emconfig.json
+
+${HLS_NAME}.xclbin: ${RUNNER_KERNEL}.xo emconfig.json
 	mkdir -p ./xclbin
 	cd ./xclbin; \
-	v++ -l -t $(EMU_MODE) --platform $(PART) --config ${WORK}/config.cfg ../$(INPUT_KERNEL).xo ../${NODE_KERNEL}.xo ../${EDGE_KERNEL}.xo -o $(HLS_NAME).xclbin; \
+	v++ -l -t $(EMU_MODE) --platform $(PART) --config ${WORK}/config.cfg ../${RUNNER_KERNEL}.xo -o $(HLS_NAME).xclbin; \
 	mv ${HLS_NAME}.xclbin ..
 
 export.sh: ${HLS_NAME}.xclbin
@@ -76,7 +87,7 @@ link:
 	${MAKE}
 
 compile:
-	rm -f  $(INPUT_KERNEL).xo ${EDGE_KERNEL}.xo ${NODE_KERNEL}.xo
+	rm -f  ${RUNNER_KERNEL}.xo
 	${MAKE}
 
 clean:

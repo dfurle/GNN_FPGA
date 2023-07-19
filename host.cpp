@@ -47,9 +47,10 @@ int setupDevice(std::vector<cl::Device>& devices, cl::Device& device){
   return 0;
 }
 
-void setupRunGraph(cl::Program& program, cl::Context& context, cl::CommandQueue& q, float *inX, float *inRo, float *inRi, float *out1){
+void setupRunGraph(cl::Program& program, cl::Context& context, cl::CommandQueue& q, float *inX, int *inRo, int *inRi, float *out1){
 
-  cl::Kernel kernel(program, "input_network");
+  cl::Kernel kernel(program, "runner");
+  // cl::Kernel kernel(program, "input_network");
   // cl::Kernel inkernel(program, "input_network_1");
   // cl::Kernel e1kernel(program, "edge_network_1");
   // cl::Kernel n1kernel(program, "node_network_1");
@@ -58,14 +59,14 @@ void setupRunGraph(cl::Program& program, cl::Context& context, cl::CommandQueue&
   // cl::Kernel eoutkernel(program, "edge_network_out");
 
   // Compute the size of array in bytes
-  size_t in_X_size = sizeof(ap_fixed<16,6>) * NHITS * NPARAMS;
-  size_t in_R_size = sizeof(ap_fixed<16,6>) * NHITS * NEDGES;
-  size_t in_H_size = sizeof(ap_fixed<16,6>) * NHITS * NPARHID;
-  size_t out_e_size = sizeof(ap_fixed<16,6>) * NEDGES;
+  size_t in_X_size = sizeof(data_t) * NHITS * NPARAMS;
+  size_t in_R_size = sizeof(R_data_t) * NHITS * NEDGES;
+  // size_t in_H_size = sizeof(data_t) * NHITS * NPARHID;
+  size_t out_e_size = sizeof(data_t) * NEDGES;
 
   std::cout << "in_X_size:  " << in_X_size << std::endl;
   std::cout << "in_R_size: " << in_R_size << std::endl;
-  std::cout << "in_H_size:  " << in_H_size << std::endl;
+  // std::cout << "in_H_size:  " << in_H_size << std::endl;
   std::cout << "out_e_size: " << out_e_size << std::endl;
 
   // These commands will allocate memory on the Device. The cl::Buffer objects
@@ -73,7 +74,7 @@ void setupRunGraph(cl::Program& program, cl::Context& context, cl::CommandQueue&
   cl::Buffer buffer_X(context, CL_MEM_READ_ONLY, in_X_size);
   cl::Buffer buffer_Ro(context, CL_MEM_READ_ONLY, in_R_size);
   cl::Buffer buffer_Ri(context, CL_MEM_READ_ONLY, in_R_size);
-  cl::Buffer buffer_H(context, CL_MEM_READ_ONLY, in_H_size);
+  // cl::Buffer buffer_H(context, CL_MEM_READ_ONLY, in_H_size);
   cl::Buffer buffer_e(context, CL_MEM_WRITE_ONLY, out_e_size);
 
   // set the kernel Arguments
@@ -81,14 +82,14 @@ void setupRunGraph(cl::Program& program, cl::Context& context, cl::CommandQueue&
   kernel.setArg(narg++, buffer_X);
   kernel.setArg(narg++, buffer_Ro);
   kernel.setArg(narg++, buffer_Ri);
-  kernel.setArg(narg++, buffer_H);
+  // kernel.setArg(narg++, buffer_H);
   kernel.setArg(narg++, buffer_e);
 
   // We then need to map our OpenCL buffers to get the pointers
   data_t *ptr_X = (data_t *)q.enqueueMapBuffer(buffer_X, CL_TRUE, CL_MAP_WRITE, 0, in_X_size);
-  data_t *ptr_Ro = (data_t *)q.enqueueMapBuffer(buffer_Ro, CL_TRUE, CL_MAP_WRITE, 0, in_R_size);
-  data_t *ptr_Ri = (data_t *)q.enqueueMapBuffer(buffer_Ri, CL_TRUE, CL_MAP_WRITE, 0, in_R_size);
-  data_t *ptr_H = (data_t *)q.enqueueMapBuffer(buffer_H, CL_TRUE, CL_MAP_WRITE, 0, in_H_size);
+  R_data_t *ptr_Ro = (R_data_t *)q.enqueueMapBuffer(buffer_Ro, CL_TRUE, CL_MAP_WRITE, 0, in_R_size);
+  R_data_t *ptr_Ri = (R_data_t *)q.enqueueMapBuffer(buffer_Ri, CL_TRUE, CL_MAP_WRITE, 0, in_R_size);
+  // data_t *ptr_H = (data_t *)q.enqueueMapBuffer(buffer_H, CL_TRUE, CL_MAP_WRITE, 0, in_H_size);
   data_t *ptr_e = (data_t *)q.enqueueMapBuffer(buffer_e, CL_TRUE, CL_MAP_READ, 0, out_e_size);
 
   std::cout << "setting input data" << std::endl;
@@ -116,9 +117,9 @@ void setupRunGraph(cl::Program& program, cl::Context& context, cl::CommandQueue&
   std::cout << "\n\n\n";
   std::cout << std::endl;
 
-  for (int i = 0; i < NHITS * NPARHID; i++) {
-    ptr_H[i] = 0;
-  }
+  // for (int i = 0; i < NHITS * NPARHID; i++) {
+  //   ptr_H[i] = 0;
+  // }
   for (int i = 0; i < NEDGES; i++) {
     ptr_e[i] = 0.1256246;
   }
@@ -209,8 +210,8 @@ int main(int argc, char *argv[]) {
   // }
   
   float* inX = new float[NHITS * NPARAMS];
-  float* inRo = new float[NHITS * NEDGES];
-  float* inRi = new float[NHITS * NEDGES];
+  int* inRo = new int[NHITS * NEDGES];
+  int* inRi = new int[NHITS * NEDGES];
   
   std::ifstream file("inputs.dat");
   if(file.is_open()){
@@ -230,23 +231,36 @@ int main(int argc, char *argv[]) {
         inX[i] = std::stof(sa);
         // in1[i] = i * 2.346547; // some random decimal to produce some decimal results
       }
-
-      for(int i = 0; i < NHITS * NEDGES; i++){
-        getline(file, sa);
-        inRo[i] = std::stof(sa);
-        // in1[i] = i * 2.346547; // some random decimal to produce some decimal results
-      }
-
       for(int i = 0; i < NHITS * NEDGES; i++){
         getline(file, sa);
         inRi[i] = std::stof(sa);
         // in1[i] = i * 2.346547; // some random decimal to produce some decimal results
       }
+      for(int i = 0; i < NHITS * NEDGES; i++){
+        getline(file, sa);
+        inRo[i] = std::stof(sa);
+        // in1[i] = i * 2.346547; // some random decimal to produce some decimal results
+      }
+      std::cout << "True Outs" << std::endl;
+      for(int i = 0; i < NEDGES; i++){
+        getline(file, sa);
+        std::cout << sa << std::endl;
+        // inRo[i] = std::stof(sa);
+        // in1[i] = i * 2.346547; // some random decimal to produce some decimal results
+      }
     }
   } else {
-    // for(int i = 0; i < NHITS * NPARHID; i++){
-    //   in1[i] = i * 2.346547; // some random decimal to produce some decimal results
-    // }
+    for(int i = 0; i < NHITS * NPARAMS; i++){
+      inX[i] = i * 2.34567;
+    }
+
+    for(int i = 0; i < NHITS * NEDGES; i++){
+      inRo[i] = (i%4==0) ? 1 : 0;
+    }
+
+    for(int i = 0; i < NHITS * NEDGES; i++){
+      inRi[i] = (i%4==0) ? 1 : 0;
+    }
   }
 
   float* out1 = new float[NEDGES];

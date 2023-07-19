@@ -1,11 +1,13 @@
-#ifndef DEFINES_H_
-#define DEFINES_H_
+#ifndef DEFINES_H_NODE
+#define DEFINES_H_NODE
 
 #include "ap_fixed.h"
 #include "ap_int.h"
 #include "nnet_utils/nnet_types.h"
 #include <cstddef>
 #include <cstdio>
+
+namespace node_net{
 
 // hls-fpga-machine-learning insert numbers
 #define N_INPUT_1_1 30
@@ -53,5 +55,7 @@ typedef ap_fixed<16,6> dense_node_out_bias_t;
 typedef ap_uint<1> layer10_index;
 typedef ap_fixed<16,6> result_t;
 typedef ap_fixed<18,8> dense_node_out_relu_table_t;
+
+}
 
 #endif

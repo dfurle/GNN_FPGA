@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "myproject.h"
-#include "parameters.h"
+#include "myproject_i.h"
+#include "parameters_i.h"
 
 namespace input_net{
 
@@ -13,13 +13,14 @@ void input_network_s(input_t dense_in_1_input[N_INPUT_1_1], result_t layer9_out[
 void input_network(hls::stream<X_t>& X_stream, hls::stream<H_t>& H_stream){
 #endif
 #ifdef VECTOR
-void input_network(X_t X, H_t H){
+void input_network(X_t& X, H_t& H){
 #endif
 #ifdef ARRAY
 void input_network(data_t X[NHITS * NPARAMS], data_t H[NHITS * NPARHID]){
 #endif
-  input_t in1[N_INPUT_1_1];
-  result_t out1[N_LAYER_8];
+
+  input_net::input_t in1[N_INPUT_1_1];
+  input_net::result_t out1[N_LAYER_8];
 
   #ifdef STREAM
   X_t X;
@@ -67,6 +68,7 @@ void input_network(data_t X[NHITS * NPARAMS], data_t H[NHITS * NPARHID]){
   #ifdef STREAM
   H_stream << H;
   #endif
+
 }
 
 namespace input_net{

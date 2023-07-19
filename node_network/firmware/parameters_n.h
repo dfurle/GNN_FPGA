@@ -1,5 +1,5 @@
-#ifndef PARAMETERS_H_
-#define PARAMETERS_H_
+#ifndef PARAMETERS_H_NODE
+#define PARAMETERS_H_NODE
 
 #include "ap_fixed.h"
 #include "ap_int.h"
@@ -14,7 +14,9 @@
 #include "nnet_utils/nnet_dense_stream.h"
 
 namespace node_net{
+
 // hls-fpga-machine-learning insert weights
+#define __SYNTHESIS__
 #include "weights/w2.h"
 #include "weights/b2.h"
 #include "weights/w4.h"
@@ -25,6 +27,7 @@ namespace node_net{
 #include "weights/b8.h"
 #include "weights/w10.h"
 #include "weights/b10.h"
+#undef __SYNTHESIS__
 
 // hls-fpga-machine-learning insert layer-config
 // dense_node_1

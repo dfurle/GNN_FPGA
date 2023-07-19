@@ -1,8 +1,28 @@
-#include "input_network/firmware/myproject.h"
-#include "edge_network/firmware/myproject.h"
-#include "node_network/firmware/myproject.h"
+#include "input_network/firmware/myproject_i.h"
+#include "edge_network/firmware/myproject_e.h"
+#include "node_network/firmware/myproject_n.h"
 
-void runner(data_t X_arr[NHITS * NPARAMS], data_t Ro_arr[NHITS * NEDGES], data_t Ri_arr[NHITS * NEDGES], data_t e_arr[NEDGES]){
+#include "projectDefines.h"
+
+#include <iostream>
+
+extern "C"{
+
+void runner(data_t X_arr[NHITS * NPARAMS], R_data_t Ro_arr[NHITS * NEDGES], R_data_t Ri_arr[NHITS * NEDGES], data_t e_arr[NEDGES]){
+  #pragma HLS INTERFACE m_axi port=X_arr  offset=slave bundle=gmem
+  #pragma HLS INTERFACE m_axi port=Ro_arr offset=slave bundle=gmem
+  #pragma HLS INTERFACE m_axi port=Ri_arr offset=slave bundle=gmem
+  #pragma HLS INTERFACE m_axi port=e_arr  offset=slave bundle=gmem
+  #pragma HLS INTERFACE s_axilite port=X_arr  bundle=control
+  #pragma HLS INTERFACE s_axilite port=Ro_arr bundle=control
+  #pragma HLS INTERFACE s_axilite port=Ri_arr bundle=control
+  #pragma HLS INTERFACE s_axilite port=e_arr  bundle=control
+  #pragma HLS INTERFACE s_axilite port=return bundle=control
+
+  // #pragma HLS ARRAY_RESHAPE variable = X_arr complete dim = 0
+  // #pragma HLS ARRAY_RESHAPE variable = Ro_arr complete dim = 0
+  // #pragma HLS ARRAY_RESHAPE variable = Ri_arr complete dim = 0
+  // #pragma HLS ARRAY_RESHAPE variable = e_arr complete dim = 0
 
   #ifdef STREAM
   H_t H;
@@ -72,10 +92,26 @@ void runner(data_t X_arr[NHITS * NPARAMS], data_t Ro_arr[NHITS * NEDGES], data_t
   R_t Ro, Ri;
   e_t e;
 
-  data_t* ptr = (data_t*) X.begin();
-  ptr = X_arr;
+
+  for(int i = 0; i < NHITS; i++){
+    for(int j = 0; j < NPARAMS; j++){
+      X[i][j] = X_arr[i*NPARAMS + j];
+    }
+    for(int j = 0; j < NEDGES; j++){
+      Ro[i][j] = Ro_arr[i*NEDGES + j];
+      Ri[i][j] = Ri_arr[i*NEDGES + j];
+    }
+  }
 
   input_network(X, H);
+
+  std::cout << "H: " << std::endl;
+  for(int i = 0; i < NHITS; i++){
+    for(int j = 0; j < NPARHID; j++){
+      std::cout << float(H[i][j]) << std::endl;
+    }
+  }
+
   // ITER #1
   edge_network(H, Ro, Ri, e);
   node_network(H, Ro, Ri, e, H2);
@@ -84,6 +120,7 @@ void runner(data_t X_arr[NHITS * NPARAMS], data_t Ro_arr[NHITS * NEDGES], data_t
   node_network(H2, Ro, Ri, e, H);
   // Ending
   edge_network(H, Ro, Ri, e);
+
   for(int i = 0; i < NEDGES; i++){
     e_arr[i] = e[i];
   }
@@ -104,4 +141,6 @@ void runner(data_t X_arr[NHITS * NPARAMS], data_t Ro_arr[NHITS * NEDGES], data_t
   edge_network(H_arr, Ro_arr, Ri_arr, e_arr);
   #endif
   
+}
+
 }

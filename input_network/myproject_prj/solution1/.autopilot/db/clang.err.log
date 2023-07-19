@@ -1,6 +1,0 @@
-In file included from firmware/myproject.cpp:4:
-In file included from firmware/parameters.h:11:
-firmware/nnet_utils/nnet_activation_stream.h:453:9: warning: the pragma is not supported and will be ignored [-Winvalid-hls-pragmas]
-#pragma HLS DATA_PACK variable=out_data
-        ^
-1 warning generated.

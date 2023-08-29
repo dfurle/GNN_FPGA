@@ -18,14 +18,14 @@ namespace edge_net{
 
 // hls-fpga-machine-learning insert weights
 #define __SYNTHESIS__
+#include "weights_e/w1.h"
+#include "weights_e/b1.h"
 #include "weights_e/w2.h"
 #include "weights_e/b2.h"
+#include "weights_e/w3.h"
+#include "weights_e/b3.h"
 #include "weights_e/w4.h"
 #include "weights_e/b4.h"
-#include "weights_e/w6.h"
-#include "weights_e/b6.h"
-#include "weights_e/w8.h"
-#include "weights_e/b8.h"
 #undef __SYNTHESIS__
 
 // hls-fpga-machine-learning insert layer-config
@@ -36,8 +36,8 @@ struct config2 : nnet::dense_config {
     static const unsigned io_type = nnet::io_parallel;
     static const unsigned strategy = nnet::latency;
     static const unsigned reuse_factor = 1;
-    static const unsigned n_zeros = 120;
-    static const unsigned n_nonzeros = 40;
+    static const unsigned n_zeros = 0;
+    static const unsigned n_nonzeros = 160;
     static const unsigned multiplier_limit = DIV_ROUNDUP(n_in * n_out, reuse_factor) - n_zeros / reuse_factor;
     static const bool store_weights_in_bram = false;
     typedef model_default_t accum_t;
@@ -64,8 +64,8 @@ struct config4 : nnet::dense_config {
     static const unsigned io_type = nnet::io_parallel;
     static const unsigned strategy = nnet::latency;
     static const unsigned reuse_factor = 1;
-    static const unsigned n_zeros = 48;
-    static const unsigned n_nonzeros = 16;
+    static const unsigned n_zeros = 0;
+    static const unsigned n_nonzeros = 64;
     static const unsigned multiplier_limit = DIV_ROUNDUP(n_in * n_out, reuse_factor) - n_zeros / reuse_factor;
     static const bool store_weights_in_bram = false;
     typedef model_default_t accum_t;
@@ -92,8 +92,8 @@ struct config6 : nnet::dense_config {
     static const unsigned io_type = nnet::io_parallel;
     static const unsigned strategy = nnet::latency;
     static const unsigned reuse_factor = 1;
-    static const unsigned n_zeros = 48;
-    static const unsigned n_nonzeros = 16;
+    static const unsigned n_zeros = 0;
+    static const unsigned n_nonzeros = 64;
     static const unsigned multiplier_limit = DIV_ROUNDUP(n_in * n_out, reuse_factor) - n_zeros / reuse_factor;
     static const bool store_weights_in_bram = false;
     typedef model_default_t accum_t;
@@ -120,8 +120,8 @@ struct config8 : nnet::dense_config {
     static const unsigned io_type = nnet::io_parallel;
     static const unsigned strategy = nnet::latency;
     static const unsigned reuse_factor = 1;
-    static const unsigned n_zeros = 6;
-    static const unsigned n_nonzeros = 2;
+    static const unsigned n_zeros = 0;
+    static const unsigned n_nonzeros = 8;
     static const unsigned multiplier_limit = DIV_ROUNDUP(n_in * n_out, reuse_factor) - n_zeros / reuse_factor;
     static const bool store_weights_in_bram = false;
     typedef model_default_t accum_t;

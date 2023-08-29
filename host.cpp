@@ -106,13 +106,13 @@ void setupRunGraph(cl::Program& program, cl::Context& context, cl::CommandQueue&
 
   std::cout << "Ro, Ri: " << std::endl;
   for (int i = 0; i < NHITS * NEDGES; i++) {
-    ptr_Ro[i] = inRo[i];
-    ptr_Ri[i] = inRi[i];
+    ptr_Ro[i] = ap_uint<2>(inRo[i]);
+    ptr_Ri[i] = ap_uint<2>(inRi[i]);
     // ptr_Ro[i] = i * 0.12542476;
     // ptr_Ri[i] = i * 0.78654325;
-    std::cout << "(" << ptr_Ro[i] << ", " << ptr_Ri[i] << ")  ";
-    if(i % NEDGES == NEDGES-1)
-      std::cout << "\n\n\n";
+    // std::cout << "(" << ptr_Ro[i] << ", " << ptr_Ri[i] << ")  ";
+    // if(i % NEDGES == NEDGES-1)
+    //   std::cout << "\n\n\n";
   }
   std::cout << "\n\n\n";
   std::cout << std::endl;
@@ -151,7 +151,7 @@ void setupRunGraph(cl::Program& program, cl::Context& context, cl::CommandQueue&
   // setting input data
   for (int i = 0; i < NEDGES; i++) {
     out1[i] = ptr_e[i];
-    std::cout << out1[i] << " ";
+    std::cout << out1[i] << ", ";
   }
   std::cout << std::endl;
 
@@ -233,12 +233,12 @@ int main(int argc, char *argv[]) {
       }
       for(int i = 0; i < NHITS * NEDGES; i++){
         getline(file, sa);
-        inRi[i] = std::stof(sa);
+        inRo[i] = std::stoi(sa);
         // in1[i] = i * 2.346547; // some random decimal to produce some decimal results
       }
       for(int i = 0; i < NHITS * NEDGES; i++){
         getline(file, sa);
-        inRo[i] = std::stof(sa);
+        inRi[i] = std::stoi(sa);
         // in1[i] = i * 2.346547; // some random decimal to produce some decimal results
       }
       std::cout << "True Outs" << std::endl;

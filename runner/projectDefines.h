@@ -6,14 +6,14 @@
 #include "hls_vector.h"
 #include "hls_stream.h"
 
-#define NHITS   20
-#define NEDGES  40
+#define NHITS  100
+#define NEDGES 300
 #define NPARAMS  2
 #define NHIDDEN  8
 
 // #define STREAM
-#define VECTOR
-// #define ARRAY
+// #define VECTOR
+#define ARRAY
 
 // #define DISABLE_INPUT
 // #define DISABLE_EDGE
@@ -25,7 +25,17 @@
 #define NPARHID3 30 //NPARHID + NPARHID + NPARHID
 
 typedef ap_fixed<16,6> data_t;
-typedef ap_int<2> R_data_t;
+typedef ap_uint<2> R_data_t;
+
+
+
+// typedef hls::vector<data_t, NPARAMS> node_t;
+// typedef hls::vector<data_t, NPARHID> hidden_t;
+// typedef hls::vector<data_t, NPARHID2> hidden2_t;
+// typedef hls::vector<data_t, NPARHID3> hidden3_t;
+// typedef hls::vector<R_data_t, NEDGES> Redges_t;
+// typedef hls::vector<data_t, NEDGES> e_t;
+
 
 typedef hls::vector<hls::vector<data_t,NPARAMS>, NHITS> X_t;
 typedef hls::vector<hls::vector<data_t,NPARHID>, NHITS> H_t;

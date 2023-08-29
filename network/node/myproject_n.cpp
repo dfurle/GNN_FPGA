@@ -7,7 +7,7 @@
 namespace node_net{
 
 void node_runner(data_t B[NEDGES * NPARHID2], data_t e[NEDGES]);
-void node_network_s(input_t dense_node_1_input[N_INPUT_1_1], result_t layer11_out[N_LAYER_10]);
+void node_network_s(input_t dense_node_1_input[N_INPUT_1_1], result_t layer11_out[N_LAYER_8]);
 
 }
 
@@ -27,7 +27,7 @@ void node_network(hls::stream<H_t>& Hin_stream, hls::stream<R_t>& Ro_stream, hls
 void node_network(H_t& H, R_t& Ro, R_t& Ri, e_t& e, H_t& Hout){
 #endif
 #ifdef ARRAY
-void node_network(data_t H[NHITS * NPARHID], data_t Ro[NHITS * NEDGES], data_t Ri[NHITS * NEDGES], data_t e[NEDGES], data_t Hout[NHITS * NPARHID]){
+void node_network(data_t H[NHITS * NPARHID], R_data_t Ro[NHITS * NEDGES], R_data_t Ri[NHITS * NEDGES], data_t e[NEDGES], data_t Hout[NHITS * NPARHID]){
 #endif
 
   #ifdef DISABLE_NODE
@@ -97,13 +97,13 @@ void node_network(data_t H[NHITS * NPARHID], data_t Ro[NHITS * NEDGES], data_t R
     // #pragma HLS unroll
     for(int j = 0; j < NPARHID; j++){
       // #pragma HLS unroll
-      M[i*NPARHID + j] = mi[i*NPARHID + j];
-      M[i*NPARHID + j + NPARHID] = mo[i*NPARHID + j];
+      M[i*NPARHID3 + j] = mi[i*NPARHID + j];
+      M[i*NPARHID3 + j + NPARHID] = mo[i*NPARHID + j];
       #if defined(STREAM) || defined(VECTOR)
       M[i*NPARHID + j + NPARHID2] = H[i][j];
       #endif
       #ifdef ARRAY
-      M[i*NPARHID + j + NPARHID2] = H[i*NPARHID + j];
+      M[i*NPARHID3 + j + NPARHID2] = H[i*NPARHID + j];
       #endif
     }
   }
@@ -151,75 +151,43 @@ void node_runner(data_t M[NHITS * NPARHID3], data_t H[NHITS * NPARHID]){
 
 
 
-void node_network_s(input_t dense_node_1_input[N_INPUT_1_1], result_t layer11_out[N_LAYER_10]) {
+void node_network_s(input_t in1[N_INPUT_1_1], result_t out1[N_LAYER_8]) {
+  // hls-fpga-machine-learning insert IO
+  #pragma HLS ARRAY_RESHAPE variable=in1 complete dim=0
+  #pragma HLS ARRAY_PARTITION variable=out1 complete dim=0
+  #pragma HLS INTERFACE ap_vld port=in1, out1 
+  #pragma HLS PIPELINE 
 
-    // hls-fpga-machine-learning insert IO
-    #pragma HLS ARRAY_RESHAPE variable=dense_node_1_input complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=layer11_out complete dim=0
-    #pragma HLS INTERFACE ap_vld port=dense_node_1_input,layer11_out 
-    #pragma HLS PIPELINE 
 
-// #ifndef __SYNTHESIS__
-//     static bool loaded_weights = false;
-//     if (!loaded_weights) {
-//         // hls-fpga-machine-learning insert load weights
-//         nnet::load_weights_from_txt<dense_node_1_weight_t, 240>(w2, "w2.txt");
-//         nnet::load_weights_from_txt<dense_node_1_bias_t, 8>(b2, "b2.txt");
-//         nnet::load_weights_from_txt<dense_node_2_weight_t, 64>(w4, "w4.txt");
-//         nnet::load_weights_from_txt<dense_node_2_bias_t, 8>(b4, "b4.txt");
-//         nnet::load_weights_from_txt<dense_node_3_weight_t, 64>(w6, "w6.txt");
-//         nnet::load_weights_from_txt<dense_node_3_bias_t, 8>(b6, "b6.txt");
-//         nnet::load_weights_from_txt<dense_node_4_weight_t, 64>(w8, "w8.txt");
-//         nnet::load_weights_from_txt<dense_node_4_bias_t, 8>(b8, "b8.txt");
-//         nnet::load_weights_from_txt<dense_node_out_weight_t, 64>(w10, "w10.txt");
-//         nnet::load_weights_from_txt<dense_node_out_bias_t, 8>(b10, "b10.txt");
-//         loaded_weights = true;
-//     }
-// #endif
+  layer2_t layer2_out[N_LAYER_2];
+  #pragma HLS ARRAY_PARTITION variable=layer2_out complete dim=0
+  nnet::dense<input_t, layer2_t, config2>(in1, layer2_out, w1, b1); // dense_node_1
 
-    // ****************************************
-    // NETWORK INSTANTIATION
-    // ****************************************
+  layer3_t layer3_out[N_LAYER_2];
+  #pragma HLS ARRAY_PARTITION variable=layer3_out complete dim=0
+  nnet::relu<layer2_t, layer3_t, relu_config3>(layer2_out, layer3_out); // dense_node_1_relu
 
-    // hls-fpga-machine-learning insert layers
+  layer4_t layer4_out[N_LAYER_4];
+  #pragma HLS ARRAY_PARTITION variable=layer4_out complete dim=0
+  nnet::dense<layer3_t, layer4_t, config4>(layer3_out, layer4_out, w2, b2); // dense_node_2
 
-    layer2_t layer2_out[N_LAYER_2];
-    #pragma HLS ARRAY_PARTITION variable=layer2_out complete dim=0
-    nnet::dense<input_t, layer2_t, config2>(dense_node_1_input, layer2_out, w2, b2); // dense_node_1
+  layer5_t layer5_out[N_LAYER_4];
+  #pragma HLS ARRAY_PARTITION variable=layer5_out complete dim=0
+  nnet::relu<layer4_t, layer5_t, relu_config5>(layer4_out, layer5_out); // dense_node_2_relu
 
-    layer3_t layer3_out[N_LAYER_2];
-    #pragma HLS ARRAY_PARTITION variable=layer3_out complete dim=0
-    nnet::relu<layer2_t, layer3_t, relu_config3>(layer2_out, layer3_out); // dense_node_1_relu
+  layer6_t layer6_out[N_LAYER_6];
+  #pragma HLS ARRAY_PARTITION variable=layer6_out complete dim=0
+  nnet::dense<layer5_t, layer6_t, config6>(layer5_out, layer6_out, w3, b3); // dense_node_3
 
-    layer4_t layer4_out[N_LAYER_4];
-    #pragma HLS ARRAY_PARTITION variable=layer4_out complete dim=0
-    nnet::dense<layer3_t, layer4_t, config4>(layer3_out, layer4_out, w4, b4); // dense_node_2
+  layer7_t layer7_out[N_LAYER_6];
+  #pragma HLS ARRAY_PARTITION variable=layer7_out complete dim=0
+  nnet::relu<layer6_t, layer7_t, relu_config7>(layer6_out, layer7_out); // dense_node_3_relu
 
-    layer5_t layer5_out[N_LAYER_4];
-    #pragma HLS ARRAY_PARTITION variable=layer5_out complete dim=0
-    nnet::relu<layer4_t, layer5_t, relu_config5>(layer4_out, layer5_out); // dense_node_2_relu
+  layer8_t layer8_out[N_LAYER_8];
+  #pragma HLS ARRAY_PARTITION variable=layer8_out complete dim=0
+  nnet::dense<layer7_t, layer8_t, config8>(layer7_out, layer8_out, w4, b4); // dense_node_out
 
-    layer6_t layer6_out[N_LAYER_6];
-    #pragma HLS ARRAY_PARTITION variable=layer6_out complete dim=0
-    nnet::dense<layer5_t, layer6_t, config6>(layer5_out, layer6_out, w6, b6); // dense_node_3
-
-    layer7_t layer7_out[N_LAYER_6];
-    #pragma HLS ARRAY_PARTITION variable=layer7_out complete dim=0
-    nnet::relu<layer6_t, layer7_t, relu_config7>(layer6_out, layer7_out); // dense_node_3_relu
-
-    layer8_t layer8_out[N_LAYER_8];
-    #pragma HLS ARRAY_PARTITION variable=layer8_out complete dim=0
-    nnet::dense<layer7_t, layer8_t, config8>(layer7_out, layer8_out, w8, b8); // dense_node_4
-
-    layer9_t layer9_out[N_LAYER_8];
-    #pragma HLS ARRAY_PARTITION variable=layer9_out complete dim=0
-    nnet::relu<layer8_t, layer9_t, relu_config9>(layer8_out, layer9_out); // dense_node_4_relu
-
-    layer10_t layer10_out[N_LAYER_10];
-    #pragma HLS ARRAY_PARTITION variable=layer10_out complete dim=0
-    nnet::dense<layer9_t, layer10_t, config10>(layer9_out, layer10_out, w10, b10); // dense_node_out
-
-    nnet::relu<layer10_t, result_t, relu_config11>(layer10_out, layer11_out); // dense_node_out_relu
+  nnet::relu<layer8_t, result_t, relu_config11>(layer8_out, out1); // dense_node_out_relu
 
 }
 

@@ -6,8 +6,11 @@
 #include "hls_vector.h"
 #include "hls_stream.h"
 
-#define NHITS  100
-#define NEDGES 300
+
+// #define NHITS  100
+// #define NEDGES 300
+#define NHITS  21
+#define NEDGES 42
 #define NPARAMS  2
 #define NHIDDEN  8
 

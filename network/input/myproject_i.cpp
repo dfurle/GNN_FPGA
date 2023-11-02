@@ -18,16 +18,19 @@ void input_network(X_t& X, H_t& H){
 #ifdef ARRAY
 void input_network(data_t X[NHITS * NPARAMS], data_t H[NHITS * NPARHID]){
 #endif
+  // #pragma HLS PIPELINE
 
   input_net::input_t in1[N_INPUT_1_1];
   input_net::result_t out1[N_LAYER_8];
+  #pragma HLS ARRAY_PARTITION variable=in1
+  #pragma HLS ARRAY_PARTITION variable=out1
 
   #ifdef STREAM
   X_t X;
   H_t H;
   X_stream >> X;
   #endif
-
+INPUT_HIT_LOOP:
   for(int i = 0; i < NHITS; i++){
     #pragma HLS unroll factor=2
 

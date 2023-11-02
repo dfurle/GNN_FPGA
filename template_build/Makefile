@@ -52,7 +52,7 @@ ${RUNNER_KERNEL}.xo: ${RUNNER_SRC}
 ${HLS_NAME}.xclbin: ${RUNNER_KERNEL}.xo emconfig.json
 	mkdir -p ./xclbin
 	cd ./xclbin; \
-	v++ -l -t $(EMU_MODE) --platform $(PART) --config ${WORK}/config.cfg ../${RUNNER_KERNEL}.xo -o $(HLS_NAME).xclbin; \
+	v++ -l -t $(EMU_MODE) --platform $(PART) --config ${WORK}/runner/config.cfg ../${RUNNER_KERNEL}.xo -o $(HLS_NAME).xclbin; \
 	mv ${HLS_NAME}.xclbin ..
 
 export.sh: ${HLS_NAME}.xclbin

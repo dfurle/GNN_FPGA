@@ -20,11 +20,10 @@
 extern "C"{
 
 
-void runner(data_t X_arr[NHITS * NPARAMS], R_data_t Ro_arr[NHITS * NEDGES], R_data_t Ri_arr[NHITS * NEDGES], data_t e_arr[NEDGES]){
+void runner(data_t X_arr[NHITS * NPARAMS], i_data_t edge_index_arr[NEDGES * 2], data_t e_arr[NEDGES]){
   // #pragma HLS DATAFLOW
   #pragma HLS INTERFACE m_axi port=X_arr  offset=slave bundle=aximm1
-  #pragma HLS INTERFACE m_axi port=Ro_arr offset=slave bundle=aximm1
-  #pragma HLS INTERFACE m_axi port=Ri_arr offset=slave bundle=aximm1
+  #pragma HLS INTERFACE m_axi port=edge_index_arr offset=slave bundle=aximm1
   #pragma HLS INTERFACE m_axi port=e_arr  offset=slave bundle=aximm1
   // #pragma HLS INTERFACE s_axilite port=X_arr  bundle=control
   // #pragma HLS INTERFACE s_axilite port=Ro_arr bundle=control
@@ -177,61 +176,55 @@ void runner(data_t X_arr[NHITS * NPARAMS], R_data_t Ro_arr[NHITS * NEDGES], R_da
 
 
   data_t read_X_arr[NHITS * NPARAMS];
-  R_data_t read_Ro_arr[NHITS * NEDGES];
-  R_data_t read_Ri_arr[NHITS * NEDGES];
+  i_data_t read_edge_index_arr[NEDGES * 2];
   data_t read_e_arr[NEDGES];
   // #pragma HLS ARRAY_PARTITION variable=read_X_arr complete
-  // #pragma HLS ARRAY_PARTITION variable=read_Ro_arr complete
-  // #pragma HLS ARRAY_PARTITION variable=read_Ri_arr complete
+  // #pragma HLS ARRAY_PARTITION variable=read_edge_index_arr complete
+  // #pragma HLS ARRAY_PARTITION variable=read_edge_index_arr block factor=2
   // #pragma HLS ARRAY_PARTITION variable=read_e_arr complete
 
-READ_IN_HITS:
+READ_IN1_HITS:
   for(int i = 0; i < NHITS; i++){
+    #pragma HLS unroll factor=1
+READ_IN_INNER_HITS:
     for(int j = 0; j < NPARAMS; j++){
+      #pragma HLS unroll factor=1
       read_X_arr[i*NPARAMS + j] = X_arr[i*NPARAMS + j];
     }
-  READ_IN_INNER_EDGES:
-    for(int j = 0; j < NEDGES; j++){
-      read_Ro_arr[i*NEDGES + j] = Ro_arr[i*NEDGES + j];
-      read_Ri_arr[i*NEDGES + j] = Ri_arr[i*NEDGES + j];
-    }
   }
-READ_IN_EDGES:
+
+  int valid_edges = 0;
+
   for(int i = 0; i < NEDGES; i++){
-    read_e_arr[i] = e_arr[i];
+    #pragma HLS unroll factor=1
+    read_edge_index_arr[i*2] = edge_index_arr[i*2];
+    read_edge_index_arr[i*2+1] = edge_index_arr[i*2+1];
+    if(edge_index_arr[i*2] == i_data_t(-1) && valid_edges == 0)
+      valid_edges = i;
   }
 
   input_network(read_X_arr, read_H_arr);
-
-
   // ITER #1
-  edge_network(read_H_arr, read_Ro_arr, read_Ri_arr, read_e_arr);
-
-  // std::cout << "e_fpga = [";
-  // for(int j = 0; j < 69; j++){
-  //   std::cout << float(e_arr[j]) << ", ";
-  // }
-  // std::cout << float(e_arr[69]);
-  // std::cout << "]," << std::endl;
-
-  // std::cout << "END" << std::endl;
-
-
-  node_network(read_H_arr, read_Ro_arr, read_Ri_arr, read_e_arr, read_H2_arr);
+  edge_network(read_H_arr, read_edge_index_arr, read_e_arr, valid_edges);
+  node_network(read_H_arr, read_edge_index_arr, read_e_arr, read_H2_arr);
   // ITER #2
-  edge_network(read_H2_arr, read_Ro_arr, read_Ri_arr, read_e_arr);
-  node_network(read_H2_arr, read_Ro_arr, read_Ri_arr, read_e_arr, read_H_arr);
+  edge_network(read_H2_arr, read_edge_index_arr, read_e_arr, valid_edges);
+  node_network(read_H2_arr, read_edge_index_arr, read_e_arr, read_H_arr);
   // ITER #3
-  edge_network(read_H_arr, read_Ro_arr, read_Ri_arr, read_e_arr);
-  node_network(read_H_arr, read_Ro_arr, read_Ri_arr, read_e_arr, read_H2_arr);
+  edge_network(read_H_arr, read_edge_index_arr, read_e_arr, valid_edges);
+  node_network(read_H_arr, read_edge_index_arr, read_e_arr, read_H2_arr);
   // Ending
-  edge_network(read_H2_arr, read_Ro_arr, read_Ri_arr, read_e_arr);
+  edge_network(read_H2_arr, read_edge_index_arr, read_e_arr, valid_edges);
+
 
 WRITE_OUT:
   for(int i = 0; i < NEDGES; i++){
-    e_arr[i] = read_e_arr[i];
+    if(read_edge_index_arr[i*2] != i_data_t(-1))
+      e_arr[i] = read_e_arr[i];
+    else{
+      e_arr[i] = data_t(0.0);
+    }
   }
-
   #endif
   
 }

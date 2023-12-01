@@ -13,7 +13,7 @@ namespace edge_net{
 void edge_runner(data_t B[NEDGES * NPARHID2], data_t e[NEDGES]);
 void edge_network_s(input_t in1[N_INPUT_1_1], result_t out1[N_LAYER_8]);
 
-void bMatMul(R_data_t Ro[NHITS * NEDGES], R_data_t Ri[NHITS * NEDGES], data_t H[NHITS * NPARHID], data_t B[NEDGES * NPARHID2]);
+void createB(data_t H[NHITS * NPARHID], i_data_t edge_index[NEDGES * 2], data_t B[NEDGES * NPARHID2]);
 
 }
 
@@ -25,7 +25,7 @@ void edge_network(hls::stream<H_t>& H_stream, hls::stream<R_t>& Ro_stream, hls::
 void edge_network(H_t& H, R_t& Ro, R_t& Ri, e_t& e){
 #endif
 #ifdef ARRAY
-void edge_network(data_t H[NHITS * NPARHID], R_data_t Ro[NHITS * NEDGES], R_data_t Ri[NHITS * NEDGES], data_t e[NEDGES]){
+void edge_network(data_t H[NHITS * NPARHID], i_data_t edge_index[NEDGES * 2], data_t e[NEDGES], int valid_edges){
 #endif
   // #pragma HLS PIPELINE
 
@@ -43,63 +43,9 @@ void edge_network(data_t H[NHITS * NPARHID], R_data_t Ro[NHITS * NEDGES], R_data
   Ri_stream >> Ri;
   #endif
 
-  // data_t bo[NEDGES * NPARHID];
-  // data_t bi[NEDGES * NPARHID];
-  // #pragma HLS ARRAY_PARTITION variable=bo
-  // #pragma HLS ARRAY_PARTITION variable=bi
-
-  // data_t bo[NPARHID];
-  // data_t bi[NPARHID];
-  // data_t bo = 0;
-  // data_t bi = 0;
   data_t B[NEDGES * NPARHID2];
-  #pragma HLS ARRAY_PARTITION variable=B
-  edge_net::bMatMul(Ro, Ri, H, B);
-
-// EDGE_EDGE_LOOP:
-//   for(int i = 0; i < NEDGES; i++){
-//     #pragma HLS unroll factor=2
-//     for(int j = 0; j < NPARHID; j++){
-//       #pragma HLS unroll
-//       // bo[i*NPARHID + j] = 0;
-//       // bi[i*NPARHID + j] = 0;
-//       // bo[j] = 0;
-//       // bi[j] = 0;
-
-// EDGE_HIT_LOOP:
-//       for(int k = 0; k < NHITS; k++){
-//         #pragma HLS unroll
-//         #if defined(STREAM) || defined(VECTOR)
-//         bo[i*NPARHID + j] += Ro[k][i] * H[k][j];
-//         bi[i*NPARHID + j] += Ri[k][i] * H[k][j];
-//         #endif
-//         #ifdef ARRAY
-//         // bo[i*NPARHID + j] += Ro[k*NEDGES + i] * H[k*NPARHID + j];
-//         // bi[i*NPARHID + j] += Ri[k*NEDGES + i] * H[k*NPARHID + j];
-//         bo += Ro[k*NEDGES + i] * H[k*NPARHID + j];
-//         bi += Ri[k*NEDGES + i] * H[k*NPARHID + j];
-//         #endif
-//       }
-//       B[i*NPARHID2 + j] = bo;
-//       B[i*NPARHID2 + j + NPARHID] = bi;
-//       bo = 0;
-//       bi = 0;
-//     }
-//   }
-
-  // data_t B[NEDGES * NPARHID2];
-// EDGE2_EDGE_LOOP:
-//   for(int i = 0; i < NEDGES; i++){
-//     #pragma HLS unroll factor=2
-//     for(int j = 0; j < NPARHID; j++){
-//       #pragma HLS unroll
-//       B[i*NPARHID2 + j] = bo[i*NPARHID + j];
-//     }
-//     for(int j = 0; j < NPARHID; j++){
-//       #pragma HLS unroll
-//       B[i*NPARHID2 + j + NPARHID] = bi[i*NPARHID + j];
-//     }
-//   }
+  // #pragma HLS ARRAY_PARTITION variable=B block factor=NEDGES
+  edge_net::createB(H, edge_index, B);
 
   #if defined(STREAM) || defined(VECTOR)
   edge_net::edge_runner(B, e.begin());
@@ -107,6 +53,10 @@ void edge_network(data_t H[NHITS * NPARHID], R_data_t Ro[NHITS * NEDGES], R_data
   #ifdef ARRAY
   edge_net::edge_runner(B, e);
   #endif
+
+  for(int i = valid_edges; i < NEDGES; i++){
+    e[i] = data_t(0.0);
+  }
 
   #ifdef STREAM
   e_stream << e;
@@ -118,64 +68,38 @@ void edge_network(data_t H[NHITS * NPARHID], R_data_t Ro[NHITS * NEDGES], R_data
 namespace edge_net{
 
 
-void bMatMul(R_data_t Ro[NHITS * NEDGES], R_data_t Ri[NHITS * NEDGES], data_t H[NHITS * NPARHID], data_t B[NEDGES * NPARHID2]){
-  // #pragma HLS PIPELINE
+// B = torch.cat([X[edge_index[:, 0]], X[edge_index[:, 1]]], dim=1)
+void createB(data_t H[NHITS * NPARHID], i_data_t edge_index[NEDGES * 2], data_t B[NEDGES * NPARHID2]){
 
-  data_t bov, biv;
-  data_t bo[NHITS], bi[NHITS];
-  #pragma HLS ARRAY_PARTITION var=bo complete
-  #pragma HLS ARRAY_PARTITION var=bi complete
-
-EDGE_EDGE_LOOP:
-  for(int i = 0; i < NEDGES; i++){
+CREATE_B_LOOP:
+  for(int edge = 0; edge < NEDGES; edge++){
     #pragma HLS unroll factor=1
-    for(int j = 0; j < NPARHID; j++){
-      #pragma HLS PIPELINE
-      // #pragma HLS unroll
-EDGE_HIT_LOOP:
-      for(int k = 0; k < NHITS; k++){
+    // #pragma HLS unroll factor=10
+    // #pragma HLS PIPELINE
+    i_data_t src_node = edge_index[edge*2];
+    i_data_t dst_node = edge_index[edge*2 + 1];
+
+    if(src_node == i_data_t(-1)){
+      for(int par = 0; par < NPARHID; par++){
         #pragma HLS unroll
-        bo[k] = Ro[k*NEDGES + i] * H[k*NPARHID + j];
-        bi[k] = Ri[k*NEDGES + i] * H[k*NPARHID + j];
+        B[edge*NPARHID2 + par]           = 0;
+        B[edge*NPARHID2 + NPARHID + par] = 0;
       }
-      for(int k = 0; k < NHITS; k++){
-        #pragma HLS unroll
-        bov += bo[k];
-        biv += bi[k];
-      }
-      bov = 0;
-      biv = 0;
-      B[i*NPARHID2 + j] = bov;
-      B[i*NPARHID2 + j + NPARHID] = biv;
+      continue;
+    }
+
+    // memcpy(&B[edge*NPARHID2],           &H[src_node*NPARHID], NPARHID);
+    // memcpy(&B[edge*NPARHID2 + NPARHID], &H[dst_node*NPARHID], NPARHID);
+
+    // else, if memcpy doesnt work
+    for(int par = 0; par < NPARHID; par++){
+      // #pragma HLS unroll factor=1
+      #pragma HLS unroll
+      B[edge*NPARHID2 + par]           = H[src_node*NPARHID + par];
+      B[edge*NPARHID2 + NPARHID + par] = H[dst_node*NPARHID + par];
     }
   }
 }
-
-// void bMatMul(R_data_t Ro[NHITS * NEDGES], R_data_t Ri[NHITS * NEDGES], data_t H[NHITS * NPARHID], data_t B[NEDGES * NPARHID2]){
-//   // #pragma HLS PIPELINE
-
-//   data_t bo, bi;
-
-// EDGE_EDGE_LOOP:
-//   for(int i = 0; i < NEDGES; i++){
-//     // #pragma HLS unroll
-//     for(int j = 0; j < NPARHID; j++){
-//       #pragma HLS PIPELINE
-//       // #pragma HLS unroll
-// EDGE_HIT_LOOP:
-//       for(int k = 0; k < NHITS; k++){
-//         #pragma HLS unroll
-//         bo += Ro[k*NEDGES + i] * H[k*NPARHID + j];
-//         bi += Ri[k*NEDGES + i] * H[k*NPARHID + j];
-//       }
-//       B[i*NPARHID2 + j] = bo;
-//       B[i*NPARHID2 + j + NPARHID] = bi;
-//       bo = 0;
-//       bi = 0;
-//     }
-//   }
-// }
-
 
 
 void edge_runner(data_t B[NEDGES * NPARHID2], data_t e[NEDGES]){

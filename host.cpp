@@ -47,7 +47,7 @@ int setupDevice(std::vector<cl::Device>& devices, cl::Device& device){
   return 0;
 }
 
-void setupRunGraph(cl::Program& program, cl::Context& context, cl::CommandQueue& q, float *inX, int *inRo, int *inRi, float *out1){
+void setupRunGraph(cl::Program& program, cl::Context& context, cl::CommandQueue& q, float *inX, int *in_ei, float *out1){
 
   cl::Kernel kernel(program, "runner");
   // cl::Kernel kernel(program, "input_network");
@@ -60,36 +60,29 @@ void setupRunGraph(cl::Program& program, cl::Context& context, cl::CommandQueue&
 
   // Compute the size of array in bytes
   size_t in_X_size = sizeof(data_t) * NHITS * NPARAMS;
-  size_t in_R_size = sizeof(R_data_t) * NHITS * NEDGES;
-  // size_t in_H_size = sizeof(data_t) * NHITS * NPARHID;
+  size_t in_i_size = sizeof(i_data_t) * 2 * NEDGES;
   size_t out_e_size = sizeof(data_t) * NEDGES;
 
   std::cout << "in_X_size:  " << in_X_size << std::endl;
-  std::cout << "in_R_size: " << in_R_size << std::endl;
-  // std::cout << "in_H_size:  " << in_H_size << std::endl;
+  std::cout << "in_i_size: " << in_i_size << std::endl;
   std::cout << "out_e_size: " << out_e_size << std::endl;
 
   // These commands will allocate memory on the Device. The cl::Buffer objects
   // can be used to reference the memory locations on the device.
   cl::Buffer buffer_X(context, CL_MEM_READ_ONLY, in_X_size);
-  cl::Buffer buffer_Ro(context, CL_MEM_READ_ONLY, in_R_size);
-  cl::Buffer buffer_Ri(context, CL_MEM_READ_ONLY, in_R_size);
-  // cl::Buffer buffer_H(context, CL_MEM_READ_ONLY, in_H_size);
+  cl::Buffer buffer_i(context, CL_MEM_READ_ONLY, in_i_size);
   cl::Buffer buffer_e(context, CL_MEM_WRITE_ONLY, out_e_size);
 
   // set the kernel Arguments
   int narg = 0;
   kernel.setArg(narg++, buffer_X);
-  kernel.setArg(narg++, buffer_Ro);
-  kernel.setArg(narg++, buffer_Ri);
+  kernel.setArg(narg++, buffer_i);
   // kernel.setArg(narg++, buffer_H);
   kernel.setArg(narg++, buffer_e);
 
   // We then need to map our OpenCL buffers to get the pointers
   data_t *ptr_X = (data_t *)q.enqueueMapBuffer(buffer_X, CL_TRUE, CL_MAP_WRITE, 0, in_X_size);
-  R_data_t *ptr_Ro = (R_data_t *)q.enqueueMapBuffer(buffer_Ro, CL_TRUE, CL_MAP_WRITE, 0, in_R_size);
-  R_data_t *ptr_Ri = (R_data_t *)q.enqueueMapBuffer(buffer_Ri, CL_TRUE, CL_MAP_WRITE, 0, in_R_size);
-  // data_t *ptr_H = (data_t *)q.enqueueMapBuffer(buffer_H, CL_TRUE, CL_MAP_WRITE, 0, in_H_size);
+  i_data_t *ptr_i = (i_data_t *)q.enqueueMapBuffer(buffer_i, CL_TRUE, CL_MAP_WRITE, 0, in_i_size);
   data_t *ptr_e = (data_t *)q.enqueueMapBuffer(buffer_e, CL_TRUE, CL_MAP_READ, 0, out_e_size);
 
   std::cout << "setting input data" << std::endl;
@@ -104,10 +97,9 @@ void setupRunGraph(cl::Program& program, cl::Context& context, cl::CommandQueue&
   std::cout << "\n\n\n";
   std::cout << std::endl;
 
-  std::cout << "Ro, Ri: " << std::endl;
-  for (int i = 0; i < NHITS * NEDGES; i++) {
-    ptr_Ro[i] = ap_uint<2>(inRo[i]);
-    ptr_Ri[i] = ap_uint<2>(inRi[i]);
+  std::cout << "edge_index: " << std::endl;
+  for (int i = 0; i < 2 * NEDGES; i++) {
+    ptr_i[i] = i_data_t(in_ei[i]);
     // ptr_Ro[i] = i * 0.12542476;
     // ptr_Ri[i] = i * 0.78654325;
     // std::cout << "(" << ptr_Ro[i] << ", " << ptr_Ri[i] << ")  ";
@@ -117,18 +109,13 @@ void setupRunGraph(cl::Program& program, cl::Context& context, cl::CommandQueue&
   std::cout << "\n\n\n";
   std::cout << std::endl;
 
-  // for (int i = 0; i < NHITS * NPARHID; i++) {
-  //   ptr_H[i] = 0;
-  // }
   for (int i = 0; i < NEDGES; i++) {
     ptr_e[i] = 0.1256246;
   }
 
-
   // Data will be migrated to kernel space
   q.enqueueMigrateMemObjects({buffer_X}, 0); // 0 means from host
-  q.enqueueMigrateMemObjects({buffer_Ro}, 0); // 0 means from host
-  q.enqueueMigrateMemObjects({buffer_Ri}, 0); // 0 means from host
+  q.enqueueMigrateMemObjects({buffer_i}, 0); // 0 means from host
 
   // Launch the Kernel
   q.enqueueTask(kernel);
@@ -156,8 +143,7 @@ void setupRunGraph(cl::Program& program, cl::Context& context, cl::CommandQueue&
   std::cout << std::endl;
 
   q.enqueueUnmapMemObject(buffer_X, ptr_X);
-  q.enqueueUnmapMemObject(buffer_Ro, ptr_Ro);
-  q.enqueueUnmapMemObject(buffer_Ri, ptr_Ri);
+  q.enqueueUnmapMemObject(buffer_i, ptr_i);
   q.enqueueUnmapMemObject(buffer_e, ptr_e);
   q.finish();
 }
@@ -210,8 +196,9 @@ int main(int argc, char *argv[]) {
   // }
   
   float* inX = new float[NHITS * NPARAMS];
-  int* inRo = new int[NHITS * NEDGES];
-  int* inRi = new int[NHITS * NEDGES];
+  int* in_ei = new int[NEDGES * 2];
+
+  float* out_y = new float[NEDGES];
   
   std::ifstream file("inputs.dat");
   if(file.is_open()){
@@ -231,19 +218,15 @@ int main(int argc, char *argv[]) {
         inX[i] = std::stof(sa);
         // in1[i] = i * 2.346547; // some random decimal to produce some decimal results
       }
-      for(int i = 0; i < NHITS * NEDGES; i++){
+      for(int i = 0; i < NEDGES * 2; i++){
         getline(file, sa);
-        inRo[i] = std::stoi(sa);
-        // in1[i] = i * 2.346547; // some random decimal to produce some decimal results
-      }
-      for(int i = 0; i < NHITS * NEDGES; i++){
-        getline(file, sa);
-        inRi[i] = std::stoi(sa);
+        in_ei[i] = std::stoi(sa);
         // in1[i] = i * 2.346547; // some random decimal to produce some decimal results
       }
       std::cout << "True Outs" << std::endl;
       for(int i = 0; i < NEDGES; i++){
         getline(file, sa);
+        out_y[i] = std::stof(sa);
         std::cout << sa << std::endl;
         // inRo[i] = std::stof(sa);
         // in1[i] = i * 2.346547; // some random decimal to produce some decimal results
@@ -254,20 +237,28 @@ int main(int argc, char *argv[]) {
       inX[i] = i * 2.34567;
     }
 
-    for(int i = 0; i < NHITS * NEDGES; i++){
-      inRo[i] = (i%4==0) ? 1 : 0;
-    }
-
-    for(int i = 0; i < NHITS * NEDGES; i++){
-      inRi[i] = (i%4==0) ? 1 : 0;
+    for(int i = 0; i < NEDGES * 2; i++){
+      in_ei[i] = (i%4==0) ? 1 : 0;
     }
   }
 
   float* out1 = new float[NEDGES];
   printf("\nRUNNING GRAPH\n\n");
-  setupRunGraph(program, context, q, inX, inRo, inRi, out1);
+  setupRunGraph(program, context, q, inX, in_ei, out1);
 
-  float* out = out1;
+  std::cout << std::endl;
+
+  printf("\nTrue Outs:\n");
+  for (int i = 0; i < NEDGES; i++) {
+    std::cout << out_y[i] << ", ";
+  }
+
+  std::cout << std::endl;
+
+  printf("\n Diff True-Pred:\n");
+  for (int i = 0; i < NEDGES; i++) {
+    std::cout << out_y[i] - out1[i] << ", ";
+  }
 
   std::cout << "Finished" << std::endl;
   return 0;

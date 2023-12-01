@@ -7,10 +7,10 @@
 #include "hls_stream.h"
 
 
-// #define NHITS  100
-// #define NEDGES 300
-#define NHITS  21
-#define NEDGES 42
+#define NHITS  150
+#define NEDGES 200
+// #define NHITS  21
+// #define NEDGES 42
 #define NPARAMS  2
 #define NHIDDEN  8
 
@@ -28,7 +28,7 @@
 #define NPARHID3 30 //NPARHID + NPARHID + NPARHID
 
 typedef ap_fixed<16,6> data_t;
-typedef ap_uint<2> R_data_t;
+typedef ap_uint<8> i_data_t; // max nodes: 256
 
 
 
@@ -40,18 +40,18 @@ typedef ap_uint<2> R_data_t;
 // typedef hls::vector<data_t, NEDGES> e_t;
 
 
-typedef hls::vector<hls::vector<data_t,NPARAMS>, NHITS> X_t;
-typedef hls::vector<hls::vector<data_t,NPARHID>, NHITS> H_t;
-typedef hls::vector<hls::vector<data_t,NPARHID2>, NHITS> H2_t;
-typedef hls::vector<hls::vector<data_t,NPARHID3>, NHITS> H3_t;
-typedef hls::vector<hls::vector<data_t,NPARHID>, NHITS> inner_t;
-typedef hls::vector<hls::vector<R_data_t,NEDGES>, NHITS> R_t;
+// typedef hls::vector<hls::vector<data_t,NPARAMS>, NHITS> X_t;
+// typedef hls::vector<hls::vector<data_t,NPARHID>, NHITS> H_t;
+// typedef hls::vector<hls::vector<data_t,NPARHID2>, NHITS> H2_t;
+// typedef hls::vector<hls::vector<data_t,NPARHID3>, NHITS> H3_t;
+// typedef hls::vector<hls::vector<data_t,NPARHID>, NHITS> inner_t;
+// typedef hls::vector<hls::vector<R_data_t,NEDGES>, NHITS> R_t;
 
-typedef hls::vector<hls::vector<R_data_t,NHITS>, NEDGES> R_tr_t;
+// typedef hls::vector<hls::vector<R_data_t,NHITS>, NEDGES> R_tr_t;
 
-typedef hls::vector<hls::vector<data_t,NPARHID>, NEDGES> b_t;
-typedef hls::vector<hls::vector<data_t,NPARHID2>, NEDGES> B_t;
+// typedef hls::vector<hls::vector<data_t,NPARHID>, NEDGES> b_t;
+// typedef hls::vector<hls::vector<data_t,NPARHID2>, NEDGES> B_t;
 
-typedef hls::vector<data_t, NEDGES> e_t;
+// typedef hls::vector<data_t, NEDGES> e_t;
 
 #endif

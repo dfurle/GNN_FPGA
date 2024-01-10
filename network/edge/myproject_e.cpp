@@ -44,7 +44,7 @@ void edge_network(data_t H[NHITS * NPARHID], i_data_t edge_index[NEDGES * 2], da
   #endif
 
   data_t B[NEDGES * NPARHID2];
-  // #pragma HLS ARRAY_PARTITION variable=B block factor=NEDGES
+  #pragma HLS ARRAY_PARTITION variable=B cyclic factor=NPARHID2
   edge_net::createB(H, edge_index, B);
 
   #if defined(STREAM) || defined(VECTOR)

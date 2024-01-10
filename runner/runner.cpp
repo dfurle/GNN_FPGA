@@ -170,18 +170,17 @@ void runner(data_t X_arr[NHITS * NPARAMS], i_data_t edge_index_arr[NEDGES * 2], 
 
   #ifdef ARRAY
   data_t read_H_arr[NHITS * NPARHID];
-  // #pragma HLS ARRAY_PARTITION variable=read_H_arr complete
+  #pragma HLS ARRAY_PARTITION variable=read_H_arr cyclic factor=NPARHID
   data_t read_H2_arr[NHITS * NPARHID];
-  // #pragma HLS ARRAY_PARTITION variable=read_H2_arr complete
+  #pragma HLS ARRAY_PARTITION variable=read_H2_arr cyclic factor=NPARHID
 
 
   data_t read_X_arr[NHITS * NPARAMS];
   i_data_t read_edge_index_arr[NEDGES * 2];
   data_t read_e_arr[NEDGES];
-  // #pragma HLS ARRAY_PARTITION variable=read_X_arr complete
-  // #pragma HLS ARRAY_PARTITION variable=read_edge_index_arr complete
-  // #pragma HLS ARRAY_PARTITION variable=read_edge_index_arr block factor=2
-  // #pragma HLS ARRAY_PARTITION variable=read_e_arr complete
+  #pragma HLS ARRAY_PARTITION variable=read_X_arr block factor=NHITS
+  #pragma HLS ARRAY_PARTITION variable=read_edge_index_arr block factor=NEDGES
+  #pragma HLS ARRAY_PARTITION variable=read_e_arr complete
 
 READ_IN1_HITS:
   for(int i = 0; i < NHITS; i++){

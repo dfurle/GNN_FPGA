@@ -52,6 +52,8 @@ void node_network(data_t H[NHITS * NPARHID], i_data_t edge_index[NEDGES * 2], da
 
   data_t M[NHITS * NPARHID3];
   // #pragma HLS ARRAY_PARTITION variable=M block factor=NHITS
+  // #pragma HLS ARRAY_PARTITION variable=M complete
+  #pragma HLS ARRAY_PARTITION variable=M cyclic factor=NPARHID3
   node_net::createM(H, e, edge_index, M);
 
   #if defined(STREAM) || defined(VECTOR)
@@ -82,49 +84,140 @@ void createM(data_t H[NHITS * NPARHID], data_t e[NEDGES], i_data_t edge_index[NE
   // src_aggregate = e.unsqueeze(1) * src_features
   // dst_aggregate = e.unsqueeze(1) * dst_features
 
-  data_t SRC_AGGREGATE[NEDGES * NPARHID];
-  // #pragma ARRAY_PARTITION variable=SRC_AGGREGATE cyclic
-  data_t DST_AGGREGATE[NEDGES * NPARHID];
-  // #pragma ARRAY_PARTITION variable=DST_AGGREGATE cyclic
+  // data_t SRC_AGGREGATE[NEDGES * NPARHID];
+  // #pragma ARRAY_PARTITION variable=SRC_AGGREGATE cyclic factor=NPARHID
+  // data_t DST_AGGREGATE[NEDGES * NPARHID];
+  // #pragma ARRAY_PARTITION variable=DST_AGGREGATE cyclic factor=NPARHID
 
 
+CREATE_M_ZERO_LOOP:
   for(int node = 0; node < NHITS; node++){
+    #pragma HLS unroll factor=1
     for(int par = 0; par < NPARHID3; par++){
+      #pragma HLS unroll
       M[node* NPARHID3 + par] = 0;
     }
   }
 
+
+//   data_t M_tmp[NHITS * NPARHID3];
+//   #pragma HLS ARRAY_PARTITION variable=M_tmp cyclic factor=NPARHID3
+// CREATE_M_1EDGE_LOOP:
+//   for(int edge = 0; edge < NEDGES; edge++){
+//     #pragma HLS PIPELINE
+//     // #pragma HLS unroll
+//     // #pragma HLS unroll factor=2
+//     // #pragma HLS unroll factor=10
+
+//     i_data_t src_node = edge_index[edge*2];
+//     i_data_t dst_node = edge_index[edge*2 + 1];
+
+//     if(src_node == i_data_t(-1)){
+//       break;
+//     }
+
+//     data_t H_src[NPARHID];
+//     #pragma HLS ARRAY_PARTITION variable=H_src complete
+//     data_t H_dst[NPARHID];
+//     #pragma HLS ARRAY_PARTITION variable=H_dst complete
+//     for(int par = 0; par < NPARHID; par++){
+//       #pragma HLS unroll
+//       H_src[par] = H[src_node*NPARHID + par] * e[edge];
+//       H_dst[par] = H[dst_node*NPARHID + par] * e[edge];
+//     }
+
+//     data_t par_tmp1[NPARHID];
+//     #pragma HLS ARRAY_PARTITION variable=par_tmp1 complete
+//     data_t par_tmp2[NPARHID];
+//     #pragma HLS ARRAY_PARTITION variable=par_tmp2 complete
+
+// CREATE_M_2PAR_LOOP:
+//     for(int par = 0; par < NPARHID; par++){
+//       // #pragma HLS unroll factor=1
+//       #pragma HLS unroll
+//       M[dst_node*NPARHID3 + par]           += H[src_node*NPARHID + par] * e[edge];
+//       M[src_node*NPARHID3 + par + NPARHID] += H[dst_node*NPARHID + par] * e[edge];
+//     }
+//   }
+
+
+// --- SECONDARY CODE ---
 CREATE_M_1EDGE_LOOP:
   for(int edge = 0; edge < NEDGES; edge++){
     // #pragma HLS PIPELINE
-    // #pragma HLS unroll
     #pragma HLS unroll factor=1
+    // #pragma HLS unroll factor=2
     // #pragma HLS unroll factor=10
+
     i_data_t src_node = edge_index[edge*2];
     i_data_t dst_node = edge_index[edge*2 + 1];
+    data_t edge_mult = e[edge];
 
-
-    if(src_node == i_data_t(-1)){
-      break;
+    if(src_node != i_data_t(-1)){
+      continue;
     }
 
 
 CREATE_M_2PAR_LOOP:
     for(int par = 0; par < NPARHID; par++){
-      // #pragma HLS unroll factor=1
+      // #pragma PIPELINE
       #pragma HLS unroll
-      int edge_index = edge*NPARHID + par;
-      int src_index = src_node*NPARHID + par;
-      int dst_index = dst_node*NPARHID + par;
-      SRC_AGGREGATE[edge_index] = H[src_index] * e[edge];
-      DST_AGGREGATE[edge_index] = H[dst_index] * e[edge];
+      // #pragma HLS unroll
+      // SRC_AGGREGATE[edge*NPARHID + par] = H[src_node*NPARHID + par] * e[edge];
+      // DST_AGGREGATE[edge*NPARHID + par] = H[dst_node*NPARHID + par] * e[edge];
 
-      dst_index = dst_node*NPARHID3 + par;
-      src_index = src_node*NPARHID3 + par + NPARHID;
-      M[dst_index] += SRC_AGGREGATE[edge_index];
-      M[src_index] += DST_AGGREGATE[edge_index];
+      // M[dst_node*NPARHID3 + par]           += SRC_AGGREGATE[edge*NPARHID + par];
+      // M[src_node*NPARHID3 + par + NPARHID] += DST_AGGREGATE[edge*NPARHID + par];
+      M[dst_node*NPARHID3 + par]           += H[src_node*NPARHID + par] * edge_mult;
+    }
+
+CREATE_M_3PAR_LOOP:
+    for(int par = 0; par < NPARHID; par++){
+      // #pragma PIPELINE
+      #pragma HLS unroll
+      // #pragma HLS unroll
+      // SRC_AGGREGATE[edge*NPARHID + par] = H[src_node*NPARHID + par] * e[edge];
+      // DST_AGGREGATE[edge*NPARHID + par] = H[dst_node*NPARHID + par] * e[edge];
+
+      // M[dst_node*NPARHID3 + par]           += SRC_AGGREGATE[edge*NPARHID + par];
+      // M[src_node*NPARHID3 + par + NPARHID] += DST_AGGREGATE[edge*NPARHID + par];
+
+      M[src_node*NPARHID3 + par + NPARHID] += H[dst_node*NPARHID + par] * edge_mult;
     }
   }
+// --- END ---
+
+
+// // --- MAIN CODE ---
+// CREATE_M_1EDGE_LOOP:
+//   for(int edge = 0; edge < NEDGES; edge++){
+//     #pragma HLS PIPELINE
+//     // #pragma HLS unroll
+//     // #pragma HLS unroll factor=2
+//     // #pragma HLS unroll factor=10
+
+//     i_data_t src_node = edge_index[edge*2];
+//     i_data_t dst_node = edge_index[edge*2 + 1];
+
+//     if(src_node == i_data_t(-1)){
+//       break;
+//     }
+
+// CREATE_M_2PAR_LOOP:
+//     for(int par = 0; par < NPARHID; par++){
+//       // #pragma HLS unroll factor=1
+//       #pragma HLS unroll
+//       // SRC_AGGREGATE[edge*NPARHID + par] = H[src_node*NPARHID + par] * e[edge];
+//       // DST_AGGREGATE[edge*NPARHID + par] = H[dst_node*NPARHID + par] * e[edge];
+
+//       // M[dst_node*NPARHID3 + par]           += SRC_AGGREGATE[edge*NPARHID + par];
+//       // M[src_node*NPARHID3 + par + NPARHID] += DST_AGGREGATE[edge*NPARHID + par];
+
+//       M[dst_node*NPARHID3 + par]           += H[src_node*NPARHID + par] * e[edge];
+//       M[src_node*NPARHID3 + par + NPARHID] += H[dst_node*NPARHID + par] * e[edge];
+//     }
+//   }
+// // --- END ---
 
   // # Aggregate incoming and outgoing messages
   // mi = torch.zeros(X.shape).to(self.devices)
@@ -163,7 +256,7 @@ void node_runner(data_t M[NHITS * NPARHID3], data_t H[NHITS * NPARHID]){
 
 NODE_R_HIT_LOOP:
   for(int i = 0; i < NHITS; i++){
-    #pragma HLS unroll factor=2
+    #pragma HLS unroll factor=1
     for(int j = 0; j < N_INPUT_1_1; j++){
       #pragma HLS unroll
       in1[j] = M[i*N_INPUT_1_1 + j];

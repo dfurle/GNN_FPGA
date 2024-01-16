@@ -7,10 +7,10 @@
 #include "hls_stream.h"
 
 
-// #define NHITS  150
-// #define NEDGES 200
-#define NHITS  21
-#define NEDGES 42
+#define NHITS  150
+#define NEDGES 200
+// #define NHITS  21
+// #define NEDGES 42
 #define NPARAMS  2
 #define NHIDDEN  8
 

@@ -141,6 +141,9 @@ CREATE_M_ZERO_LOOP:
 //   }
 
 
+  hls::vector<data_t, NPARHID> tmpMS[NHITS];
+  hls::vector<data_t, NPARHID> tmpMD[NHITS];
+
 // --- SECONDARY CODE ---
 CREATE_M_1EDGE_LOOP:
   for(int edge = 0; edge < NEDGES; edge++){
@@ -157,35 +160,74 @@ CREATE_M_1EDGE_LOOP:
       continue;
     }
 
+    hls::vector<data_t, NPARHID> tmpHS;
+    hls::vector<data_t, NPARHID> tmpHD;
 
 CREATE_M_2PAR_LOOP:
     for(int par = 0; par < NPARHID; par++){
-      // #pragma PIPELINE
       #pragma HLS unroll
-      // #pragma HLS unroll
-      // SRC_AGGREGATE[edge*NPARHID + par] = H[src_node*NPARHID + par] * e[edge];
-      // DST_AGGREGATE[edge*NPARHID + par] = H[dst_node*NPARHID + par] * e[edge];
-
-      // M[dst_node*NPARHID3 + par]           += SRC_AGGREGATE[edge*NPARHID + par];
-      // M[src_node*NPARHID3 + par + NPARHID] += DST_AGGREGATE[edge*NPARHID + par];
-      M[dst_node*NPARHID3 + par]           += H[src_node*NPARHID + par] * edge_mult;
+      tmpHS[par] = H[src_node*NPARHID];
     }
-
 CREATE_M_3PAR_LOOP:
     for(int par = 0; par < NPARHID; par++){
-      // #pragma PIPELINE
       #pragma HLS unroll
-      // #pragma HLS unroll
-      // SRC_AGGREGATE[edge*NPARHID + par] = H[src_node*NPARHID + par] * e[edge];
-      // DST_AGGREGATE[edge*NPARHID + par] = H[dst_node*NPARHID + par] * e[edge];
+      tmpHD[par] = H[dst_node*NPARHID];
+    }
 
-      // M[dst_node*NPARHID3 + par]           += SRC_AGGREGATE[edge*NPARHID + par];
-      // M[src_node*NPARHID3 + par + NPARHID] += DST_AGGREGATE[edge*NPARHID + par];
+    tmpMD[dst_node] += (tmpHS * edge_mult);
+    tmpMS[src_node] += (tmpHD * edge_mult);
+  }
 
-      M[src_node*NPARHID3 + par + NPARHID] += H[dst_node*NPARHID + par] * edge_mult;
+
+CREATE_M_5EDGE_LOOP:
+  for(int edge = 0; edge < NEDGES; edge++){
+    #pragma HLS unroll factor=1
+    for(int par = 0; par < NPARHID; par++){
+      #pragma HLS unroll
+      M[edge][par]           = tmpMD[edge][par];
+    }
+    for(int par = 0; par < NPARHID; par++){
+      #pragma HLS unroll
+      M[edge][par + NPARHID] = tmpMD[edge][par];
     }
   }
+
+// CREATE_M_2PAR_LOOP:
+//     for(int par = 0; par < NPARHID; par++){
+//       // #pragma PIPELINE
+//       #pragma HLS unroll
+//       // #pragma HLS unroll
+//       // SRC_AGGREGATE[edge*NPARHID + par] = H[src_node*NPARHID + par] * e[edge];
+//       // DST_AGGREGATE[edge*NPARHID + par] = H[dst_node*NPARHID + par] * e[edge];
+
+//       // M[dst_node*NPARHID3 + par]           += SRC_AGGREGATE[edge*NPARHID + par];
+//       // M[src_node*NPARHID3 + par + NPARHID] += DST_AGGREGATE[edge*NPARHID + par];
+
+
+
+//       // M[dst_node*NPARHID3 + par]           += H[src_node*NPARHID + par] * edge_mult;
+//     }
+
+// CREATE_M_3PAR_LOOP:
+//     for(int par = 0; par < NPARHID; par++){
+//       // #pragma PIPELINE
+//       #pragma HLS unroll
+//       // #pragma HLS unroll
+//       // SRC_AGGREGATE[edge*NPARHID + par] = H[src_node*NPARHID + par] * e[edge];
+//       // DST_AGGREGATE[edge*NPARHID + par] = H[dst_node*NPARHID + par] * e[edge];
+
+//       // M[dst_node*NPARHID3 + par]           += SRC_AGGREGATE[edge*NPARHID + par];
+//       // M[src_node*NPARHID3 + par + NPARHID] += DST_AGGREGATE[edge*NPARHID + par];
+
+
+
+//       M[src_node*NPARHID3 + par + NPARHID] += H[dst_node*NPARHID + par] * edge_mult;
+//     }
+//   }
 // --- END ---
+
+
+
 
 
 // // --- MAIN CODE ---

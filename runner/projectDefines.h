@@ -7,10 +7,10 @@
 #include "hls_stream.h"
 
 
-#define NHITS  150
-#define NEDGES 200
-// #define NHITS  21
-// #define NEDGES 42
+// #define NHITS  150
+// #define NEDGES 200
+#define NHITS  21
+#define NEDGES 42
 #define NPARAMS  2
 #define NHIDDEN  8
 
@@ -29,6 +29,10 @@
 
 typedef ap_fixed<16,6> data_t;
 typedef ap_uint<8> i_data_t; // max nodes: 256
+
+typedef hls::vector<data_t, NPARHID> par_t;
+typedef hls::vector<par_t, 2> par2_t;
+typedef hls::vector<par_t, 3> par3_t;
 
 
 

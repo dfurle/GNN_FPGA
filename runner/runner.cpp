@@ -169,10 +169,10 @@ void runner(data_t X_arr[NHITS * NPARAMS], i_data_t edge_index_arr[NEDGES * 2], 
   #endif
 
   #ifdef ARRAY
-  data_t read_H_arr[NHITS * NPARHID];
-  #pragma HLS ARRAY_PARTITION variable=read_H_arr cyclic factor=NPARHID
-  data_t read_H2_arr[NHITS * NPARHID];
-  #pragma HLS ARRAY_PARTITION variable=read_H2_arr cyclic factor=NPARHID
+  par_t read_H_arr[NHITS];
+  // #pragma HLS ARRAY_PARTITION variable=read_H_arr cyclic factor=NPARHID
+  par_t read_H2_arr[NHITS];
+  // #pragma HLS ARRAY_PARTITION variable=read_H2_arr cyclic factor=NPARHID
 
 
   data_t read_X_arr[NHITS * NPARAMS];
@@ -185,7 +185,6 @@ void runner(data_t X_arr[NHITS * NPARAMS], i_data_t edge_index_arr[NEDGES * 2], 
 READ_IN1_HITS:
   for(int i = 0; i < NHITS; i++){
     #pragma HLS unroll factor=1
-READ_IN_INNER_HITS:
     for(int j = 0; j < NPARAMS; j++){
       #pragma HLS unroll factor=1
       read_X_arr[i*NPARAMS + j] = X_arr[i*NPARAMS + j];
@@ -194,6 +193,7 @@ READ_IN_INNER_HITS:
 
   int valid_edges = 0;
 
+READ_IN_EDGE:
   for(int i = 0; i < NEDGES; i++){
     #pragma HLS unroll factor=1
     read_edge_index_arr[i*2] = edge_index_arr[i*2];

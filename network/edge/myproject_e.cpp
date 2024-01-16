@@ -10,66 +10,30 @@ size_t access(int x, int y, int dim2){
 
 namespace edge_net{
 
-void edge_runner(data_t B[NEDGES * NPARHID2], data_t e[NEDGES]);
+void edge_runner(par2_t B[NEDGES], data_t e[NEDGES]);
 void edge_network_s(input_t in1[N_INPUT_1_1], result_t out1[N_LAYER_8]);
-
-void createB(data_t H[NHITS * NPARHID], i_data_t edge_index[NEDGES * 2], data_t B[NEDGES * NPARHID2]);
+void createB(par_t H[NHITS], i_data_t edge_index[NEDGES * 2], par2_t B[NEDGES]);
 
 }
 
 
-#ifdef STREAM
-void edge_network(hls::stream<H_t>& H_stream, hls::stream<R_t>& Ro_stream, hls::stream<R_t>& Ri_stream, hls::stream<e_t>& e_stream){
-#endif
-#ifdef VECTOR
-void edge_network(H_t& H, R_t& Ro, R_t& Ri, e_t& e){
-#endif
-#ifdef ARRAY
-void edge_network(data_t H[NHITS * NPARHID], i_data_t edge_index[NEDGES * 2], data_t e[NEDGES], int valid_edges){
-#endif
-  // #pragma HLS PIPELINE
+void edge_network(par_t H[NHITS], i_data_t edge_index[NEDGES * 2], data_t e[NEDGES], int valid_edges){
 
-  #ifdef DISABLE_EDGE
-
-  #else
-
-  #ifdef STREAM
-  H_t H;
-  R_t Ro, Ri;
-  e_t e;
-
-  H_stream >> H;
-  Ro_stream >> Ro;
-  Ri_stream >> Ri;
-  #endif
-
-  data_t B[NEDGES * NPARHID2];
-  #pragma HLS ARRAY_PARTITION variable=B cyclic factor=NPARHID2
+  par2_t B[NEDGES];
+  // #pragma HLS ARRAY_PARTITION variable=B cyclic factor=NPARHID2
   edge_net::createB(H, edge_index, B);
 
-  #if defined(STREAM) || defined(VECTOR)
-  edge_net::edge_runner(B, e.begin());
-  #endif
-  #ifdef ARRAY
   edge_net::edge_runner(B, e);
-  #endif
 
   for(int i = valid_edges; i < NEDGES; i++){
     e[i] = data_t(0.0);
   }
 
-  #ifdef STREAM
-  e_stream << e;
-  #endif
-
-  #endif
 }
 
 namespace edge_net{
 
-
-// B = torch.cat([X[edge_index[:, 0]], X[edge_index[:, 1]]], dim=1)
-void createB(data_t H[NHITS * NPARHID], i_data_t edge_index[NEDGES * 2], data_t B[NEDGES * NPARHID2]){
+void createB(par_t H[NHITS], i_data_t edge_index[NEDGES * 2], par2_t B[NEDGES]){
 
 CREATE_B_LOOP:
   for(int edge = 0; edge < NEDGES; edge++){
@@ -82,8 +46,8 @@ CREATE_B_LOOP:
     if(src_node == i_data_t(-1)){
       for(int par = 0; par < NPARHID; par++){
         #pragma HLS unroll
-        B[edge*NPARHID2 + par]           = 0;
-        B[edge*NPARHID2 + NPARHID + par] = 0;
+        B[edge][0][par] = 0;
+        B[edge][1][par] = 0;
       }
       continue;
     }
@@ -95,14 +59,14 @@ CREATE_B_LOOP:
     for(int par = 0; par < NPARHID; par++){
       // #pragma HLS unroll factor=1
       #pragma HLS unroll
-      B[edge*NPARHID2 + par]           = H[src_node*NPARHID + par];
-      B[edge*NPARHID2 + NPARHID + par] = H[dst_node*NPARHID + par];
+      B[edge][0][par] = H[src_node][par];
+      B[edge][1][par] = H[dst_node][par];
     }
   }
 }
 
 
-void edge_runner(data_t B[NEDGES * NPARHID2], data_t e[NEDGES]){
+void edge_runner(par2_t B[NEDGES], data_t e[NEDGES]){
   // #pragma HLS PIPELINE
   edge_net::input_t in1[N_INPUT_1_1];
   edge_net::result_t out1[N_LAYER_8];
@@ -113,7 +77,7 @@ EDGE_R_EDGE_LOOP:
 
     for(int j = 0; j < N_INPUT_1_1; j++){
       #pragma HLS unroll
-      in1[j] = B[i*N_INPUT_1_1 + j];
+      in1[j] = B[i][j/NPARHID][j%NPARHID];
     }
 
     edge_network_s(in1, out1);

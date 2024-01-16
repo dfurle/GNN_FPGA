@@ -7,16 +7,7 @@
 extern "C"{
 
 // Prototype of top level function for C-synthesis
-// void edge_network(data_t H[NHITS * NPARHID], data_t Ro[NHITS * NEDGES], data_t Ri[NHITS * NEDGES], data_t e[NEDGES]);
-#ifdef STREAM
-void edge_network(hls::stream<H_t>& H_stream, hls::stream<R_t>& Ro_stream, hls::stream<R_t>& Ri_stream, hls::stream<e_t>& e_stream);
-#endif
-#ifdef VECTOR
-void edge_network(H_t& H, R_t& Ro, R_t& Ri, e_t& e);
-#endif
-#ifdef ARRAY
-void edge_network(data_t H[NHITS * NPARHID], i_data_t edge_index[NEDGES * 2], data_t e[NEDGES], int valid_edges);
-#endif
+void edge_network(par_t H[NHITS], i_data_t edge_index[NEDGES * 2], data_t e[NEDGES], int valid_edges);
 
 }
 

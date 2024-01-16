@@ -9,69 +9,34 @@ void input_network_s(input_t dense_in_1_input[N_INPUT_1_1], result_t layer9_out[
 
 }
 
-#ifdef STREAM
-void input_network(hls::stream<X_t>& X_stream, hls::stream<H_t>& H_stream){
-#endif
-#ifdef VECTOR
-void input_network(X_t& X, H_t& H){
-#endif
-#ifdef ARRAY
-void input_network(data_t X[NHITS * NPARAMS], data_t H[NHITS * NPARHID]){
-#endif
-  // #pragma HLS PIPELINE
+void input_network(data_t X[NHITS * NPARAMS], par_t H[NHITS]){
 
   input_net::input_t in1[N_INPUT_1_1];
   input_net::result_t out1[N_LAYER_8];
   #pragma HLS ARRAY_PARTITION variable=in1
   #pragma HLS ARRAY_PARTITION variable=out1
 
-  #ifdef STREAM
-  X_t X;
-  H_t H;
-  X_stream >> X;
-  #endif
 INPUT_HIT_LOOP:
   for(int i = 0; i < NHITS; i++){
     #pragma HLS unroll factor=2
-
     // in1 = (input_t*) X[i].begin();
 
     for(int j = 0; j < N_INPUT_1_1; j++){
       #pragma HLS unroll
-      #if defined(STREAM) || defined(VECTOR)
-      in1[j] = X[i][j];
-      #endif
-      #ifdef ARRAY
       in1[j] = X[i*N_INPUT_1_1 + j];
-      #endif
     }
 
     input_net::input_network_s(in1, out1);
 
     for(int j = 0; j < N_LAYER_8; j++){
       #pragma HLS unroll
-      #if defined(STREAM) || defined(VECTOR)
       H[i][j] = out1[j];
-      #endif
-      #ifdef ARRAY
-      H[i*(N_LAYER_8+N_INPUT_1_1) + j] = out1[j];
-      #endif
     }
     for(int j = 0; j < N_INPUT_1_1; j++){
       #pragma HLS unroll
-      #if defined(STREAM) || defined(VECTOR)
       H[i][j + N_LAYER_8] = in1[j];
-      #endif
-      #ifdef ARRAY
-      H[i*(N_LAYER_8+N_INPUT_1_1) + j + N_LAYER_8] = in1[j];
-      #endif
     }
   }
-
-  #ifdef STREAM
-  H_stream << H;
-  #endif
-
 }
 
 namespace input_net{

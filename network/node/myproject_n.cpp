@@ -6,10 +6,10 @@
 
 namespace node_net{
 
-void node_runner(data_t B[NEDGES * NPARHID2], data_t e[NEDGES]);
+void node_runner(par3_t M[NEDGES], par_t H_out[NHITS]);
 void node_network_s(input_t dense_node_1_input[N_INPUT_1_1], result_t layer11_out[N_LAYER_8]);
 
-void createM(data_t H[NHITS * NPARHID], data_t e[NEDGES], i_data_t edge_index[NEDGES * 2], data_t M[NHITS * NPARHID3]);
+void createM(par_t H[NHITS], data_t e[NEDGES], i_data_t edge_index[NEDGES * 2], par3_t M[NHITS]);
 }
 
 
@@ -23,134 +23,42 @@ void createM(data_t H[NHITS * NPARHID], data_t e[NEDGES], i_data_t edge_index[NE
 // mo = tf.matmul(Rwo, bi)
 // M = tf.concat([mi, mo, X], axis=1)
 // return self.node_network(M)
+void node_network(par_t H[NHITS], i_data_t edge_index[NEDGES * 2], data_t e[NEDGES], par_t Hout[NHITS]){
 
-#ifdef STREAM
-void node_network(hls::stream<H_t>& Hin_stream, hls::stream<R_t>& Ro_stream, hls::stream<R_t>& Ri_stream, hls::stream<e_t>& e_stream, hls::stream<H_t>& Hout_stream){
-#endif
-#ifdef VECTOR
-void node_network(H_t& H, R_t& Ro, R_t& Ri, e_t& e, H_t& Hout){
-#endif
-#ifdef ARRAY
-void node_network(data_t H[NHITS * NPARHID], i_data_t edge_index[NEDGES * 2], data_t e[NEDGES], data_t Hout[NHITS * NPARHID]){
-#endif
-  // #pragma HLS PIPELINE
-
-  #ifdef DISABLE_NODE
-
-  #else
-
-  #ifdef STREAM
-  H_t H, Hout;
-  R_t Ro, Ri;
-  e_t e;
-
-  Hin_stream >> H;
-  Ro_stream >> Ro;
-  Ri_stream >> Ri;
-  e_stream >> e;
-  #endif
-
-  data_t M[NHITS * NPARHID3];
-  // #pragma HLS ARRAY_PARTITION variable=M block factor=NHITS
-  // #pragma HLS ARRAY_PARTITION variable=M complete
-  #pragma HLS ARRAY_PARTITION variable=M cyclic factor=NPARHID3
+  par3_t M[NHITS];
+  // #pragma HLS ARRAY_PARTITION variable=M cyclic factor=NPARHID3
   node_net::createM(H, e, edge_index, M);
 
-  #if defined(STREAM) || defined(VECTOR)
-  node_net::node_runner(M, Hout.begin()->begin());
-  #endif
-  #ifdef ARRAY
   node_net::node_runner(M, Hout);
-  #endif
-
-  #ifdef STREAM
-  Hout_stream << Hout;
-  #endif
-
-  #endif
 }
 
 namespace node_net{
 
 
-void createM(data_t H[NHITS * NPARHID], data_t e[NEDGES], i_data_t edge_index[NEDGES * 2], data_t M[NHITS * NPARHID3]){
+void createM(par_t H[NHITS], data_t e[NEDGES], i_data_t edge_index[NEDGES * 2], par3_t M[NHITS]){
   // #pragma HLS PIPELINE
-
-  // src, dst = edge_index[:, 0], edge_index[:, 1]
-  // src_features = X[src]
-  // dst_features = X[dst]
-
-  // # Compute incoming messages
-  // src_aggregate = e.unsqueeze(1) * src_features
-  // dst_aggregate = e.unsqueeze(1) * dst_features
-
-  // data_t SRC_AGGREGATE[NEDGES * NPARHID];
-  // #pragma ARRAY_PARTITION variable=SRC_AGGREGATE cyclic factor=NPARHID
-  // data_t DST_AGGREGATE[NEDGES * NPARHID];
-  // #pragma ARRAY_PARTITION variable=DST_AGGREGATE cyclic factor=NPARHID
-
 
 CREATE_M_ZERO_LOOP:
   for(int node = 0; node < NHITS; node++){
     #pragma HLS unroll factor=1
-    for(int par = 0; par < NPARHID3; par++){
+    for(int par = 0; par < NPARHID; par++){
       #pragma HLS unroll
-      M[node* NPARHID3 + par] = 0;
+      M[node][0][par] = 0;
+      M[node][1][par] = 0;
+      M[node][2][par] = 0;
     }
   }
 
+  // -- TODO: try to remove this somehow --
+  // par_t MS[NHITS];
+  // #pragma HLS ARRAY_PARITION var=MS complete
+  // par_t MD[NHITS];
+  // #pragma HLS ARRAY_PARITION var=MD complete
 
-//   data_t M_tmp[NHITS * NPARHID3];
-//   #pragma HLS ARRAY_PARTITION variable=M_tmp cyclic factor=NPARHID3
-// CREATE_M_1EDGE_LOOP:
-//   for(int edge = 0; edge < NEDGES; edge++){
-//     #pragma HLS PIPELINE
-//     // #pragma HLS unroll
-//     // #pragma HLS unroll factor=2
-//     // #pragma HLS unroll factor=10
-
-//     i_data_t src_node = edge_index[edge*2];
-//     i_data_t dst_node = edge_index[edge*2 + 1];
-
-//     if(src_node == i_data_t(-1)){
-//       break;
-//     }
-
-//     data_t H_src[NPARHID];
-//     #pragma HLS ARRAY_PARTITION variable=H_src complete
-//     data_t H_dst[NPARHID];
-//     #pragma HLS ARRAY_PARTITION variable=H_dst complete
-//     for(int par = 0; par < NPARHID; par++){
-//       #pragma HLS unroll
-//       H_src[par] = H[src_node*NPARHID + par] * e[edge];
-//       H_dst[par] = H[dst_node*NPARHID + par] * e[edge];
-//     }
-
-//     data_t par_tmp1[NPARHID];
-//     #pragma HLS ARRAY_PARTITION variable=par_tmp1 complete
-//     data_t par_tmp2[NPARHID];
-//     #pragma HLS ARRAY_PARTITION variable=par_tmp2 complete
-
-// CREATE_M_2PAR_LOOP:
-//     for(int par = 0; par < NPARHID; par++){
-//       // #pragma HLS unroll factor=1
-//       #pragma HLS unroll
-//       M[dst_node*NPARHID3 + par]           += H[src_node*NPARHID + par] * e[edge];
-//       M[src_node*NPARHID3 + par + NPARHID] += H[dst_node*NPARHID + par] * e[edge];
-//     }
-//   }
-
-
-  hls::vector<data_t, NPARHID> tmpMS[NHITS];
-  hls::vector<data_t, NPARHID> tmpMD[NHITS];
-
-// --- SECONDARY CODE ---
 CREATE_M_1EDGE_LOOP:
   for(int edge = 0; edge < NEDGES; edge++){
     // #pragma HLS PIPELINE
     #pragma HLS unroll factor=1
-    // #pragma HLS unroll factor=2
-    // #pragma HLS unroll factor=10
 
     i_data_t src_node = edge_index[edge*2];
     i_data_t dst_node = edge_index[edge*2 + 1];
@@ -160,130 +68,39 @@ CREATE_M_1EDGE_LOOP:
       continue;
     }
 
-    hls::vector<data_t, NPARHID> tmpHS;
-    hls::vector<data_t, NPARHID> tmpHD;
-
-CREATE_M_2PAR_LOOP:
-    for(int par = 0; par < NPARHID; par++){
-      #pragma HLS unroll
-      tmpHS[par] = H[src_node*NPARHID];
-    }
-CREATE_M_3PAR_LOOP:
-    for(int par = 0; par < NPARHID; par++){
-      #pragma HLS unroll
-      tmpHD[par] = H[dst_node*NPARHID];
-    }
-
-    tmpMD[dst_node] += (tmpHS * edge_mult);
-    tmpMS[src_node] += (tmpHD * edge_mult);
+    // -- TODO: this works, but requires the loop below, which takes 1us --
+    // par_t tmp_MD = MD[dst_node];
+    // par_t tmp_MS = MS[src_node];
+    // MD[dst_node] = tmp_MD + (H[src_node] * edge_mult);
+    // MS[src_node] = tmp_MS + (H[dst_node] * edge_mult);
+    // -- try to make something like this --
+    par_t tmp_MD = M[0][dst_node];
+    par_t tmp_MS = M[1][src_node];
+    M[0][dst_node] = tmp_MD + (H[src_node] * edge_mult);
+    M[1][src_node] = tmp_MS + (H[dst_node] * edge_mult);
   }
 
-
-CREATE_M_5EDGE_LOOP:
-  for(int edge = 0; edge < NEDGES; edge++){
-    #pragma HLS unroll factor=1
-    for(int par = 0; par < NPARHID; par++){
-      #pragma HLS unroll
-      M[edge][par]           = tmpMD[edge][par];
-    }
-    for(int par = 0; par < NPARHID; par++){
-      #pragma HLS unroll
-      M[edge][par + NPARHID] = tmpMD[edge][par];
-    }
-  }
-
-// CREATE_M_2PAR_LOOP:
-//     for(int par = 0; par < NPARHID; par++){
-//       // #pragma PIPELINE
-//       #pragma HLS unroll
-//       // #pragma HLS unroll
-//       // SRC_AGGREGATE[edge*NPARHID + par] = H[src_node*NPARHID + par] * e[edge];
-//       // DST_AGGREGATE[edge*NPARHID + par] = H[dst_node*NPARHID + par] * e[edge];
-
-//       // M[dst_node*NPARHID3 + par]           += SRC_AGGREGATE[edge*NPARHID + par];
-//       // M[src_node*NPARHID3 + par + NPARHID] += DST_AGGREGATE[edge*NPARHID + par];
-
-
-
-//       // M[dst_node*NPARHID3 + par]           += H[src_node*NPARHID + par] * edge_mult;
-//     }
-
-// CREATE_M_3PAR_LOOP:
-//     for(int par = 0; par < NPARHID; par++){
-//       // #pragma PIPELINE
-//       #pragma HLS unroll
-//       // #pragma HLS unroll
-//       // SRC_AGGREGATE[edge*NPARHID + par] = H[src_node*NPARHID + par] * e[edge];
-//       // DST_AGGREGATE[edge*NPARHID + par] = H[dst_node*NPARHID + par] * e[edge];
-
-//       // M[dst_node*NPARHID3 + par]           += SRC_AGGREGATE[edge*NPARHID + par];
-//       // M[src_node*NPARHID3 + par + NPARHID] += DST_AGGREGATE[edge*NPARHID + par];
-
-
-
-//       M[src_node*NPARHID3 + par + NPARHID] += H[dst_node*NPARHID + par] * edge_mult;
-//     }
-//   }
-// --- END ---
-
-
-
-
-
-// // --- MAIN CODE ---
-// CREATE_M_1EDGE_LOOP:
+// CREATE_M_5EDGE_LOOP:
 //   for(int edge = 0; edge < NEDGES; edge++){
-//     #pragma HLS PIPELINE
-//     // #pragma HLS unroll
-//     // #pragma HLS unroll factor=2
-//     // #pragma HLS unroll factor=10
-
-//     i_data_t src_node = edge_index[edge*2];
-//     i_data_t dst_node = edge_index[edge*2 + 1];
-
-//     if(src_node == i_data_t(-1)){
-//       break;
-//     }
-
-// CREATE_M_2PAR_LOOP:
+//     #pragma HLS unroll factor=1
 //     for(int par = 0; par < NPARHID; par++){
-//       // #pragma HLS unroll factor=1
 //       #pragma HLS unroll
-//       // SRC_AGGREGATE[edge*NPARHID + par] = H[src_node*NPARHID + par] * e[edge];
-//       // DST_AGGREGATE[edge*NPARHID + par] = H[dst_node*NPARHID + par] * e[edge];
-
-//       // M[dst_node*NPARHID3 + par]           += SRC_AGGREGATE[edge*NPARHID + par];
-//       // M[src_node*NPARHID3 + par + NPARHID] += DST_AGGREGATE[edge*NPARHID + par];
-
-//       M[dst_node*NPARHID3 + par]           += H[src_node*NPARHID + par] * e[edge];
-//       M[src_node*NPARHID3 + par + NPARHID] += H[dst_node*NPARHID + par] * e[edge];
+//       M[edge][par]           = MD[edge][par];
+//     }
+//     for(int par = 0; par < NPARHID; par++){
+//       #pragma HLS unroll
+//       M[edge][par + NPARHID] = MS[edge][par];
 //     }
 //   }
-// // --- END ---
-
-  // # Aggregate incoming and outgoing messages
-  // mi = torch.zeros(X.shape).to(self.devices)
-  // mo = torch.zeros(X.shape).to(self.devices)
-  // # for i in range(edge_index.shape[0]):
-  // #    s = edge_index[i, 0]
-  // #    d = edge_index[i, 1]
-  // #    mi[d] += src_aggregate[i]
-  // #    mo[s] += dst_aggregate[i]        
-  // mi = mi.index_add(0, edge_index[:, 1], src_aggregate)
-  // mo = mo.index_add(0, edge_index[:, 0], dst_aggregate)
-  // M = torch.cat([mi, mo, X], dim=1)
 
 CREATE_M_3NODE_LOOP:
   for(int node = 0; node < NHITS; node++){
     #pragma HLS unroll factor=1
-    // #pragma HLS unroll factor=10
-    // #pragma HLS unroll
-    // #pragma HLS PIPELINE
-CREATE_M_4PAR_LOOP:
+
     for(int par = 0; par < NPARHID; par++){
       // #pragma HLS unroll factor=1
       #pragma HLS unroll
-      M[node*NPARHID3 + par + NPARHID2] = H[node*NPARHID + par];
+      M[node][2][par + NPARHID2] = H[node][par];
     }
   }
 
@@ -291,7 +108,7 @@ CREATE_M_4PAR_LOOP:
 }
 
 
-void node_runner(data_t M[NHITS * NPARHID3], data_t H[NHITS * NPARHID]){
+void node_runner(par3_t M[NHITS ], par_t H[NHITS]){
   // #pragma HLS PIPELINE
   node_net::input_t in1[N_INPUT_1_1];
   node_net::result_t out1[N_LAYER_8];
@@ -301,18 +118,18 @@ NODE_R_HIT_LOOP:
     #pragma HLS unroll factor=1
     for(int j = 0; j < N_INPUT_1_1; j++){
       #pragma HLS unroll
-      in1[j] = M[i*N_INPUT_1_1 + j];
+      in1[j] = M[i][j/NPARHID][j%NPARHID];
     }
 
     node_network_s(in1, out1);
 
     for(int j = 0; j < N_LAYER_8; j++){
       #pragma HLS unroll
-      H[i*NPARHID + j] = out1[j];
+      H[i][j] = out1[j];
     }
     for(int j = 0; j < NPARAMS; j++){
       #pragma HLS unroll
-      H[i*NPARHID + j + NHIDDEN] = in1[j + (NPARHID3 - NPARAMS)];
+      H[i][j + NHIDDEN] = in1[j + (NPARHID3 - NPARAMS)];
     }
   }
 }

@@ -4,7 +4,7 @@ HLS_NAME := GraphNetwork
 # xilinx part to be used
 PART := xilinx_u200_gen3x16_xdma_2_202110_1
 # emulation mode (sw_emu, hw_emu, hw)
-EMU_MODE := hw_emu
+EMU_MODE := sw_emu
 
 ########
 
@@ -42,14 +42,14 @@ RUNNER_SRC := ${WORK}/runner/runner.cpp ${INPUT_SRC} ${NODE_SRC} ${EDGE_SRC}
 RUNNER_INCLUDE := -I${WORK} -I${WORK}/network/firmware ${INPUT_INCLUDE} ${EDGE_INCLUDE} ${NODE_INCLUDE}
 RUNNER_KERNEL := runner
 KERNEL_CFG := ${WORK}/runner/hls_config.cfg
-${RUNNER_KERNEL}.xo: ${RUNNER_SRC}
+${RUNNER_KERNEL}.xo: ${RUNNER_SRC} ${KERNEL_CFG}
 	mkdir -p ./kernels
 	cd ./kernels; \
 	v++ -c --mode hls --config ${KERNEL_CFG}; \
 	mv ${RUNNER_KERNEL}/${RUNNER_KERNEL}.xo ..
 
 
-${HLS_NAME}.xclbin: ${RUNNER_KERNEL}.xo emconfig.json
+${HLS_NAME}.xclbin: ${RUNNER_KERNEL}.xo ${WORK}/runner/config.cfg emconfig.json
 	mkdir -p ./xclbin
 	cd ./xclbin; \
 	v++ -l -t $(EMU_MODE) --platform $(PART) --config ${WORK}/runner/config.cfg ../${RUNNER_KERNEL}.xo -o $(HLS_NAME).xclbin; \

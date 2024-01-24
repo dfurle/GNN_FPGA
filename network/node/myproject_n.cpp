@@ -49,12 +49,6 @@ CREATE_M_ZERO_LOOP:
     }
   }
 
-  // -- TODO: try to remove this somehow --
-  // par_t MS[NHITS];
-  // #pragma HLS ARRAY_PARITION var=MS complete
-  // par_t MD[NHITS];
-  // #pragma HLS ARRAY_PARITION var=MD complete
-
 CREATE_M_1EDGE_LOOP:
   for(int edge = 0; edge < NEDGES; edge++){
     // #pragma HLS PIPELINE
@@ -68,30 +62,11 @@ CREATE_M_1EDGE_LOOP:
       continue;
     }
 
-    // -- TODO: this works, but requires the loop below, which takes 1us --
-    // par_t tmp_MD = MD[dst_node];
-    // par_t tmp_MS = MS[src_node];
-    // MD[dst_node] = tmp_MD + (H[src_node] * edge_mult);
-    // MS[src_node] = tmp_MS + (H[dst_node] * edge_mult);
-    // -- try to make something like this --
     par_t tmp_MD = M[0][dst_node];
     par_t tmp_MS = M[1][src_node];
     M[0][dst_node] = tmp_MD + (H[src_node] * edge_mult);
     M[1][src_node] = tmp_MS + (H[dst_node] * edge_mult);
   }
-
-// CREATE_M_5EDGE_LOOP:
-//   for(int edge = 0; edge < NEDGES; edge++){
-//     #pragma HLS unroll factor=1
-//     for(int par = 0; par < NPARHID; par++){
-//       #pragma HLS unroll
-//       M[edge][par]           = MD[edge][par];
-//     }
-//     for(int par = 0; par < NPARHID; par++){
-//       #pragma HLS unroll
-//       M[edge][par + NPARHID] = MS[edge][par];
-//     }
-//   }
 
 CREATE_M_3NODE_LOOP:
   for(int node = 0; node < NHITS; node++){
@@ -100,15 +75,13 @@ CREATE_M_3NODE_LOOP:
     for(int par = 0; par < NPARHID; par++){
       // #pragma HLS unroll factor=1
       #pragma HLS unroll
-      M[node][2][par + NPARHID2] = H[node][par];
+      M[node][2][par] = H[node][par];
     }
   }
-
-
 }
 
 
-void node_runner(par3_t M[NHITS ], par_t H[NHITS]){
+void node_runner(par3_t M[NHITS], par_t H[NHITS]){
   // #pragma HLS PIPELINE
   node_net::input_t in1[N_INPUT_1_1];
   node_net::result_t out1[N_LAYER_8];

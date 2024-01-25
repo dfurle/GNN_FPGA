@@ -62,10 +62,10 @@ CREATE_M_1EDGE_LOOP:
       continue;
     }
 
-    par_t tmp_MD = M[0][dst_node];
-    par_t tmp_MS = M[1][src_node];
-    M[0][dst_node] = tmp_MD + (H[src_node] * edge_mult);
-    M[1][src_node] = tmp_MS + (H[dst_node] * edge_mult);
+    par_t tmp_MD = M[dst_node][0];
+    par_t tmp_MS = M[src_node][1];
+    M[dst_node][0] = tmp_MD + (H[src_node] * edge_mult);
+    M[src_node][1] = tmp_MS + (H[dst_node] * edge_mult);
   }
 
 CREATE_M_3NODE_LOOP:

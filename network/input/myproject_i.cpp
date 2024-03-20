@@ -10,6 +10,7 @@ void input_network_s(input_t dense_in_1_input[N_INPUT_1_1], result_t layer9_out[
 }
 
 void input_network(data_t X[NHITS * NPARAMS], par_t H[NHITS]){
+  // #pragma HLS INLINE off
 
   input_net::input_t in1[N_INPUT_1_1];
   input_net::result_t out1[N_LAYER_8];

@@ -33,6 +33,7 @@ typedef ap_uint<8> i_data_t; // max nodes: 256
 typedef hls::vector<data_t, NPARHID> par_t;
 typedef hls::vector<par_t, 2> par2_t;
 typedef hls::vector<par_t, 3> par3_t;
+typedef hls::vector<i_data_t, NEDGES*2> ei_t;
 
 
 

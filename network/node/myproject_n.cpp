@@ -9,7 +9,7 @@ namespace node_net{
 void node_runner(par3_t M[NEDGES], par_t H_out[NHITS]);
 void node_network_s(input_t dense_node_1_input[N_INPUT_1_1], result_t layer11_out[N_LAYER_8]);
 
-void createM(par_t H[NHITS], data_t e[NEDGES], i_data_t edge_index[NEDGES * 2], par3_t M[NHITS]);
+void createM(par_t H[NHITS], data_t e[NEDGES], ei_t edge_index, par3_t M[NHITS]);
 }
 
 
@@ -23,10 +23,11 @@ void createM(par_t H[NHITS], data_t e[NEDGES], i_data_t edge_index[NEDGES * 2], 
 // mo = tf.matmul(Rwo, bi)
 // M = tf.concat([mi, mo, X], axis=1)
 // return self.node_network(M)
-void node_network(par_t H[NHITS], i_data_t edge_index[NEDGES * 2], data_t e[NEDGES], par_t Hout[NHITS]){
+void node_network(par_t H[NHITS], ei_t edge_index, data_t e[NEDGES], par_t Hout[NHITS]){
+  // #pragma HLS INLINE off
 
   par3_t M[NHITS];
-  // #pragma HLS ARRAY_PARTITION variable=M cyclic factor=NPARHID3
+  #pragma HLS ARRAY_PARTITION variable=M complete
   node_net::createM(H, e, edge_index, M);
 
   node_net::node_runner(M, Hout);
@@ -35,12 +36,14 @@ void node_network(par_t H[NHITS], i_data_t edge_index[NEDGES * 2], data_t e[NEDG
 namespace node_net{
 
 
-void createM(par_t H[NHITS], data_t e[NEDGES], i_data_t edge_index[NEDGES * 2], par3_t M[NHITS]){
+void createM(par_t H[NHITS], data_t e[NEDGES], ei_t edge_index, par3_t M[NHITS]){
+  // #pragma HLS INLINE off
   // #pragma HLS PIPELINE
 
 CREATE_M_ZERO_LOOP:
   for(int node = 0; node < NHITS; node++){
-    #pragma HLS unroll factor=1
+    // #pragma HLS unroll factor=1
+    #pragma HLS unroll
     for(int par = 0; par < NPARHID; par++){
       #pragma HLS unroll
       M[node][0][par] = 0;
@@ -51,8 +54,9 @@ CREATE_M_ZERO_LOOP:
 
 CREATE_M_1EDGE_LOOP:
   for(int edge = 0; edge < NEDGES; edge++){
-    // #pragma HLS PIPELINE
-    #pragma HLS unroll factor=1
+    #pragma HLS PIPELINE
+    // #pragma HLS unroll factor=10
+    // #pragma HLS unroll
 
     i_data_t src_node = edge_index[edge*2];
     i_data_t dst_node = edge_index[edge*2 + 1];
@@ -70,7 +74,8 @@ CREATE_M_1EDGE_LOOP:
 
 CREATE_M_3NODE_LOOP:
   for(int node = 0; node < NHITS; node++){
-    #pragma HLS unroll factor=1
+    // #pragma HLS unroll factor=1
+    #pragma HLS unroll
 
     for(int par = 0; par < NPARHID; par++){
       // #pragma HLS unroll factor=1

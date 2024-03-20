@@ -13,11 +13,102 @@
  *  - The II Violation in module 'edge_network_1_Pipeline_EDGE_EDGE_LOOP' (loop 'EDGE_EDGE_LOOP'): Unable to schedule bus request operation ('aximm1_load_395_req', /home/denis/UBUNTU_TEST/graph_network/network/edge/myproject_e.cpp:75) on port 'aximm1' (/home/denis/UBUNTU_TEST/graph_network/network/edge/myproject_e.cpp:75) due to limited memory ports (II = 256). Please consider using a memory core with more ports or partitioning the array.
  *  - Automatically inferring inferring RAM_1WNR storage type for array 'Ri'. Use bind_storage pragma to override this type.
  * 
+ * 
+ * Figure out what this is using vitis analyzer---
+ *     + runGraphNetwork_Pipeline_VITIS_LOOP_28_1                              |       -|   2.87|        -|          -|         -|        -|     -|        no|         -|           -|     67 (~0%)|    171 (~0%)|    -|
+    |   o VITIS_LOOP_28_1                                                      |       -|   4.40|        -|          -|         1|        1|     -|       yes|         -|           -|            -|            -|    -|
+    |  + runGraphNetwork_Pipeline_VITIS_LOOP_28_11                             |       -|   2.87|        -|          -|         -|        -|     -|        no|         -|           -|     67 (~0%)|    171 (~0%)|    -|
+    |   o VITIS_LOOP_28_1                                                      |       -|   4.40|        -|          -|         1|        1|     -|       yes|         -|           -|            -|            -|    -|
+    |  + runGraphNetwork_Pipeline_VITIS_LOOP_28_12                             |       -|   2.87|        -|          -|         -|        -|     -|        no|         -|           -|     67 (~0%)|    171 (~0%)|    -|
+    |   o VITIS_LOOP_28_1                                                      |       -|   4.40|        -|          -|         1|        1|     -|       yes|         -|           -|            -|            -|    -|
+    |  + runGraphNetwork_Pipeline_VITIS_LOOP_28_13                             |       -|   2.87|        -|          -|         -|        -|     -|        no|         -|           -|     67 (~0%)|    171 (~0%)|    -|
+    |   o VITIS_LOOP_28_1   
+ * 
+ * 
  */
 
+// #define RUN_PIPELINE
 
 
 extern "C"{
+
+
+// void runIteration(par_t H_0[NHITS], ei_t ei_0, int valid_edges){
+//   par_t H_1[NHITS];
+//   data_t e_1[NEDGES];
+//   ei_t ei_1 = ei_0;
+//   edge_network(H_0, ei_1, e_1, valid_edges);
+//   node_network(H_0, ei_1, e_1, H_1);
+// }
+
+
+void runGraphNetwork(data_t X_arr[NHITS * NPARAMS], i_data_t edge_i_arr[NEDGES * 2], data_t e_arr[NEDGES], int valid_edges){
+  #pragma HLS PIPELINE
+  // #pragma HLS INLINE off
+
+  ei_t ei_arr;
+  for(int i = 0; i < NEDGES; i++){
+    #pragma HLS UNROLL
+    ei_arr[i] = edge_i_arr[i];
+  }
+
+  #ifndef RUN_PIPELINE
+  par_t H_0[NHITS];
+  #pragma HLS ARRAY_PARTITION variable=H_0 complete
+  par_t H_1[NHITS];
+  #pragma HLS ARRAY_PARTITION variable=H_1 complete
+
+input:
+  input_network(X_arr, H_0);
+  
+pass1:
+  edge_network(H_0, ei_arr, e_arr, valid_edges);
+  node_network(H_0, ei_arr, e_arr, H_1);
+
+pass2:
+  edge_network(H_1, ei_arr, e_arr, valid_edges);
+  node_network(H_1, ei_arr, e_arr, H_0);
+
+pass3:
+  edge_network(H_0, ei_arr, e_arr, valid_edges);
+  node_network(H_0, ei_arr, e_arr, H_1);
+
+final:
+  edge_network(H_1, ei_arr, e_arr, valid_edges);
+
+  #else
+  // INPUT
+  par_t H_0[NHITS];
+  ei_t ei_0 = ei_arr;
+  input_network(X_arr, H_0);
+
+  // ITER #1
+  par_t H_1[NHITS];
+  data_t e_1[NEDGES];
+  ei_t ei_1 = ei_0;
+  edge_network(H_0, ei_1, e_1, valid_edges);
+  node_network(H_0, ei_1, e_1, H_1);
+  
+
+  // // ITER #2
+  // par_t H_2[NHITS];
+  // data_t e_2[NEDGES];
+  // ei_t ei_2 = ei_1;
+  // edge_network(H_1, ei_2, e_2, valid_edges);
+  // node_network(H_1, ei_2, e_2, H_2);
+
+  // // ITER #3
+  // par_t H_3[NHITS];
+  // data_t e_3[NEDGES];
+  // ei_t ei_3 = ei_2;
+  // edge_network(H_2, ei_3, e_3, valid_edges);
+  // node_network(H_2, ei_3, e_3, H_3);
+
+  // ENDING
+  edge_network(H_1, ei_1, e_arr, valid_edges);
+  // edge_network(H_3, ei_3, e_arr, valid_edges);
+  #endif
+}
 
 
 void runner(data_t X_arr[NHITS * NPARAMS], i_data_t edge_index_arr[NEDGES * 2], data_t e_arr[NEDGES]){
@@ -36,10 +127,10 @@ void runner(data_t X_arr[NHITS * NPARAMS], i_data_t edge_index_arr[NEDGES * 2], 
   // #pragma HLS ARRAY_RESHAPE variable = Ri_arr complete dim = 0
   // #pragma HLS ARRAY_RESHAPE variable = e_arr complete dim = 0
 
-  par_t read_H_arr[NHITS];
-  // #pragma HLS ARRAY_PARTITION variable=read_H_arr cyclic factor=NPARHID
-  par_t read_H2_arr[NHITS];
-  // #pragma HLS ARRAY_PARTITION variable=read_H2_arr cyclic factor=NPARHID
+  // par_t read_H_arr[NHITS];
+  // // #pragma HLS ARRAY_PARTITION variable=read_H_arr cyclic factor=NPARHID
+  // par_t read_H2_arr[NHITS];
+  // // #pragma HLS ARRAY_PARTITION variable=read_H2_arr cyclic factor=NPARHID
 
 
   data_t read_X_arr[NHITS * NPARAMS];
@@ -69,29 +160,37 @@ READ_IN_EDGE:
       valid_edges = i;
   }
 
-  input_network(read_X_arr, read_H_arr);
-  // ITER #1
-  edge_network(read_H_arr, read_edge_index_arr, read_e_arr, valid_edges);
-  node_network(read_H_arr, read_edge_index_arr, read_e_arr, read_H2_arr);
-  // ITER #2
-  edge_network(read_H2_arr, read_edge_index_arr, read_e_arr, valid_edges);
-  node_network(read_H2_arr, read_edge_index_arr, read_e_arr, read_H_arr);
-  // ITER #3
-  edge_network(read_H_arr, read_edge_index_arr, read_e_arr, valid_edges);
-  node_network(read_H_arr, read_edge_index_arr, read_e_arr, read_H2_arr);
-  // Ending
-  edge_network(read_H2_arr, read_edge_index_arr, read_e_arr, valid_edges);
+  runGraphNetwork(read_X_arr, read_edge_index_arr, read_e_arr, valid_edges);
+
+
+  // par_t H_0[NHITS];
+  // #pragma HLS ARRAY_PARTITION variable=H_0 complete
+  // par_t H_1[NHITS];
+  // #pragma HLS ARRAY_PARTITION variable=H_1 complete
+
+  // input_network(X_arr, H_0);
+
+  // edge_network(H_0, read_edge_index_arr, read_e_arr, valid_edges);
+
+  // node_network(H_0, read_edge_index_arr, read_e_arr, H_1);
+
+  // edge_network(H_1, read_edge_index_arr, read_e_arr, valid_edges);
+  // node_network(H_1, read_edge_index_arr, read_e_arr, H_0);
+
+  // edge_network(H_0, read_edge_index_arr, read_e_arr, valid_edges);
+  // node_network(H_0, read_edge_index_arr, read_e_arr, H_1);
+
+  // edge_network(H_1, read_edge_index_arr, read_e_arr, valid_edges);
 
 
 WRITE_OUT:
   for(int i = 0; i < NEDGES; i++){
-    if(read_edge_index_arr[i*2] != i_data_t(-1))
+    if(read_edge_index_arr[i*2] != i_data_t(-1)){
       e_arr[i] = read_e_arr[i];
-    else{
+    }else{
       e_arr[i] = data_t(0.0);
     }
   }
-  
 }
 
 }

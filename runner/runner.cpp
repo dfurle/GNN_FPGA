@@ -33,24 +33,54 @@
 extern "C"{
 
 
-// void runIteration(par_t H_0[NHITS], ei_t ei_0, int valid_edges){
-//   par_t H_1[NHITS];
-//   data_t e_1[NEDGES];
-//   ei_t ei_1 = ei_0;
-//   edge_network(H_0, ei_1, e_1, valid_edges);
-//   node_network(H_0, ei_1, e_1, H_1);
-// }
-
-
-void runGraphNetwork(data_t X_arr[NHITS * NPARAMS], i_data_t edge_i_arr[NEDGES * 2], data_t e_arr[NEDGES], int valid_edges){
-  #pragma HLS PIPELINE
+void runGraphNetwork(hls::stream<data_t>& in_X_stream, hls::stream<i_data_t>& in_ei_stream, hls::stream<data_t>& out_e_stream){
+  // #pragma HLS DATAFLOW
   // #pragma HLS INLINE off
 
-  ei_t ei_arr;
-  for(int i = 0; i < NEDGES; i++){
-    #pragma HLS UNROLL
-    ei_arr[i] = edge_i_arr[i];
+  data_t X[NHITS * NPARAMS];
+  #pragma HLS ARRAY_PARTITION variable=X complete
+  for(int i = 0; i < NHITS * NPARAMS; i++){
+    #pragma HLS PIPELINE
+    X[i] = in_X_stream.read();
   }
+
+
+  // printf("\n\n");
+  // printf("X input:\n");
+  // for(int i = 0; i < NHITS; i++){
+  //   for(int j = 0; j < NPARAMS; j++){
+  //     // printf("%.3f, ", float(X[i][j]));
+  //     std::cout << X[i*NPARAMS + j] << ", ";
+  //   }
+  //   printf("\n");
+  // }
+  // printf("\n\n");
+
+
+  int valid_edges = 0;
+  ei_t ei;
+  for(int i = 0; i < NEDGES * 2; i++){
+    #pragma HLS PIPELINE
+    ei[i] = in_ei_stream.read();
+    if(ei[i] == i_data_t(-1) && valid_edges == 0)
+      valid_edges = i/2;
+  }
+
+  // printf("\n\n");
+  // printf("ei input:\n");
+  // for(int i = 0; i < NEDGES; i++){
+  //   for(int j = 0; j < 2; j++){
+  //     printf("%d, ", int(ei[i*2+j]));
+  //   }
+  //   printf("\n");
+  // }
+  // printf("\n\n");
+
+  data_t e[NEDGES];
+  #pragma HLS ARRAY_PARTITION variable=e complete
+
+
+  // printf("valid edges: %d\n", valid_edges);
 
   #ifndef RUN_PIPELINE
   par_t H_0[NHITS];
@@ -59,138 +89,81 @@ void runGraphNetwork(data_t X_arr[NHITS * NPARAMS], i_data_t edge_i_arr[NEDGES *
   #pragma HLS ARRAY_PARTITION variable=H_1 complete
 
 input:
-  input_network(X_arr, H_0);
+  input_network(X, H_0);
+
+  // printf("\n\n");
+  // printf("H_0 after input:\n");
+  // for(int i = 0; i < NHITS; i++){
+  //   for(int j = 0; j < NPARHID; j++){
+  //     printf("%.3f, ", float(H_0[i][j]));
+  //   }
+  //   printf("\n");
+  // }
+  // printf("\n\n");
   
 pass1:
-  edge_network(H_0, ei_arr, e_arr, valid_edges);
-  node_network(H_0, ei_arr, e_arr, H_1);
+  edge_network(H_0, ei, e, valid_edges);
+  node_network(H_0, ei, e, H_1);
 
-pass2:
-  edge_network(H_1, ei_arr, e_arr, valid_edges);
-  node_network(H_1, ei_arr, e_arr, H_0);
+// pass2:
+//   edge_network(H_1, ei_arr, e_arr, valid_edges);
+//   node_network(H_1, ei_arr, e_arr, H_0);
 
-pass3:
-  edge_network(H_0, ei_arr, e_arr, valid_edges);
-  node_network(H_0, ei_arr, e_arr, H_1);
+// pass3:
+//   edge_network(H_0, ei_arr, e_arr, valid_edges);
+//   node_network(H_0, ei_arr, e_arr, H_1);
 
 final:
-  edge_network(H_1, ei_arr, e_arr, valid_edges);
+  edge_network(H_1, ei, e, valid_edges);
+
+
+  for(int i = 0; i < NEDGES; i++){
+    out_e_stream.write(e[i]);
+  }
 
   #else
-  // INPUT
+
   par_t H_0[NHITS];
+  #pragma HLS ARRAY_PARTITION variable=H_0 complete
+
+  par_t H_1[NHITS];
+  data_t e_1[NEDGES];
+  #pragma HLS ARRAY_PARTITION variable=H_1 complete
+  #pragma HLS ARRAY_PARTITION variable=e_1 complete
+
+  par_t H_2[NHITS];
+  data_t e_2[NEDGES];
+  #pragma HLS ARRAY_PARTITION variable=H_2 complete
+  #pragma HLS ARRAY_PARTITION variable=e_2 complete
+
+  par_t H_3[NHITS];
+  data_t e_3[NEDGES];
+  #pragma HLS ARRAY_PARTITION variable=H_3 complete
+  #pragma HLS ARRAY_PARTITION variable=e_3 complete
+
+  // INPUT
   ei_t ei_0 = ei_arr;
   input_network(X_arr, H_0);
 
   // ITER #1
-  par_t H_1[NHITS];
-  data_t e_1[NEDGES];
   ei_t ei_1 = ei_0;
   edge_network(H_0, ei_1, e_1, valid_edges);
   node_network(H_0, ei_1, e_1, H_1);
   
-
   // // ITER #2
-  // par_t H_2[NHITS];
-  // data_t e_2[NEDGES];
-  // ei_t ei_2 = ei_1;
-  // edge_network(H_1, ei_2, e_2, valid_edges);
-  // node_network(H_1, ei_2, e_2, H_2);
+  ei_t ei_2 = ei_1;
+  edge_network(H_1, ei_2, e_2, valid_edges);
+  node_network(H_1, ei_2, e_2, H_2);
 
   // // ITER #3
-  // par_t H_3[NHITS];
-  // data_t e_3[NEDGES];
-  // ei_t ei_3 = ei_2;
-  // edge_network(H_2, ei_3, e_3, valid_edges);
-  // node_network(H_2, ei_3, e_3, H_3);
+  ei_t ei_3 = ei_2;
+  edge_network(H_2, ei_3, e_3, valid_edges);
+  node_network(H_2, ei_3, e_3, H_3);
 
   // ENDING
-  edge_network(H_1, ei_1, e_arr, valid_edges);
-  // edge_network(H_3, ei_3, e_arr, valid_edges);
+  ei_t ei_4 = ei_3;
+  edge_network(H_3, ei_4, e_arr, valid_edges);
   #endif
-}
-
-
-void runner(data_t X_arr[NHITS * NPARAMS], i_data_t edge_index_arr[NEDGES * 2], data_t e_arr[NEDGES]){
-  // #pragma HLS DATAFLOW
-  #pragma HLS INTERFACE m_axi port=X_arr  offset=slave bundle=aximm1
-  #pragma HLS INTERFACE m_axi port=edge_index_arr offset=slave bundle=aximm1
-  #pragma HLS INTERFACE m_axi port=e_arr  offset=slave bundle=aximm1
-  // #pragma HLS INTERFACE s_axilite port=X_arr  bundle=control
-  // #pragma HLS INTERFACE s_axilite port=Ro_arr bundle=control
-  // #pragma HLS INTERFACE s_axilite port=Ri_arr bundle=control
-  // #pragma HLS INTERFACE s_axilite port=e_arr  bundle=control
-  // #pragma HLS INTERFACE s_axilite port=return bundle=control
-
-  // #pragma HLS ARRAY_RESHAPE variable = X_arr complete dim = 0
-  // #pragma HLS ARRAY_RESHAPE variable = Ro_arr complete dim = 0
-  // #pragma HLS ARRAY_RESHAPE variable = Ri_arr complete dim = 0
-  // #pragma HLS ARRAY_RESHAPE variable = e_arr complete dim = 0
-
-  // par_t read_H_arr[NHITS];
-  // // #pragma HLS ARRAY_PARTITION variable=read_H_arr cyclic factor=NPARHID
-  // par_t read_H2_arr[NHITS];
-  // // #pragma HLS ARRAY_PARTITION variable=read_H2_arr cyclic factor=NPARHID
-
-
-  data_t read_X_arr[NHITS * NPARAMS];
-  i_data_t read_edge_index_arr[NEDGES * 2];
-  data_t read_e_arr[NEDGES];
-  #pragma HLS ARRAY_PARTITION variable=read_X_arr block factor=NHITS
-  #pragma HLS ARRAY_PARTITION variable=read_edge_index_arr block factor=NEDGES
-  #pragma HLS ARRAY_PARTITION variable=read_e_arr complete
-
-READ_IN1_HITS:
-  for(int i = 0; i < NHITS; i++){
-    #pragma HLS unroll factor=1
-    for(int j = 0; j < NPARAMS; j++){
-      #pragma HLS unroll factor=1
-      read_X_arr[i*NPARAMS + j] = X_arr[i*NPARAMS + j];
-    }
-  }
-
-  int valid_edges = 0;
-
-READ_IN_EDGE:
-  for(int i = 0; i < NEDGES; i++){
-    #pragma HLS unroll factor=1
-    read_edge_index_arr[i*2] = edge_index_arr[i*2];
-    read_edge_index_arr[i*2+1] = edge_index_arr[i*2+1];
-    if(edge_index_arr[i*2] == i_data_t(-1) && valid_edges == 0)
-      valid_edges = i;
-  }
-
-  runGraphNetwork(read_X_arr, read_edge_index_arr, read_e_arr, valid_edges);
-
-
-  // par_t H_0[NHITS];
-  // #pragma HLS ARRAY_PARTITION variable=H_0 complete
-  // par_t H_1[NHITS];
-  // #pragma HLS ARRAY_PARTITION variable=H_1 complete
-
-  // input_network(X_arr, H_0);
-
-  // edge_network(H_0, read_edge_index_arr, read_e_arr, valid_edges);
-
-  // node_network(H_0, read_edge_index_arr, read_e_arr, H_1);
-
-  // edge_network(H_1, read_edge_index_arr, read_e_arr, valid_edges);
-  // node_network(H_1, read_edge_index_arr, read_e_arr, H_0);
-
-  // edge_network(H_0, read_edge_index_arr, read_e_arr, valid_edges);
-  // node_network(H_0, read_edge_index_arr, read_e_arr, H_1);
-
-  // edge_network(H_1, read_edge_index_arr, read_e_arr, valid_edges);
-
-
-WRITE_OUT:
-  for(int i = 0; i < NEDGES; i++){
-    if(read_edge_index_arr[i*2] != i_data_t(-1)){
-      e_arr[i] = read_e_arr[i];
-    }else{
-      e_arr[i] = data_t(0.0);
-    }
-  }
 }
 
 }

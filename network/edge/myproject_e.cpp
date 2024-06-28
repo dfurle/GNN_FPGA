@@ -44,6 +44,7 @@ SET_INVALID_EDGES:
 namespace edge_net{
 
 void createB(par_t H[NHITS], ei_t edge_index, par2_t B[NEDGES]){
+  // #pragma HLS PIPELINE
   // #pragma HLS INLINE off
 
 CREATE_B_LOOP:
@@ -64,21 +65,25 @@ CREATE_B_LOOP:
       continue;
     }
 
-    B[edge][0] = H[src_node];
-    B[edge][1] = H[dst_node];
+
+    // possibly interleve?
+    par_t tmp1 = H[src_node];
+    B[edge][0] = tmp1;
+    par_t tmp2 = H[dst_node];
+    B[edge][1] = tmp2;
   }
 }
 
 
 void edge_runner(par2_t B[NEDGES], data_t e[NEDGES]){
   // #pragma HLS INLINE off
-  // #pragma HLS PIPELINE
+  #pragma HLS PIPELINE
   edge_net::input_t in1[N_INPUT_1_1];
   edge_net::result_t out1[N_LAYER_8];
 
 EDGE_R_EDGE_LOOP:
   for(int i = 0; i < NEDGES; i++){
-    #pragma HLS unroll factor=2
+    // #pragma HLS unroll factor=2
 
     for(int j = 0; j < N_INPUT_1_1; j++){
       #pragma HLS unroll

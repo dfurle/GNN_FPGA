@@ -8,7 +8,7 @@
 
 
 #define NHITS  150
-#define NEDGES 200
+#define NEDGES 256
 // #define NHITS  21
 // #define NEDGES 42
 #define NPARAMS  2
@@ -36,27 +36,11 @@ typedef hls::vector<par_t, 3> par3_t;
 typedef hls::vector<i_data_t, NEDGES*2> ei_t;
 
 
+extern "C"{
 
-// typedef hls::vector<data_t, NPARAMS> node_t;
-// typedef hls::vector<data_t, NPARHID> hidden_t;
-// typedef hls::vector<data_t, NPARHID2> hidden2_t;
-// typedef hls::vector<data_t, NPARHID3> hidden3_t;
-// typedef hls::vector<R_data_t, NEDGES> Redges_t;
-// typedef hls::vector<data_t, NEDGES> e_t;
+void runGraphNetwork(hls::stream<data_t>& X_stream, hls::stream<i_data_t>& ei_stream, hls::stream<data_t>& e_stream);
+// void runGraphNetwork(data_t X_arr[NHITS * NPARAMS], i_data_t edge_i_arr[NEDGES * 2], data_t e_arr[NEDGES]);
 
-
-// typedef hls::vector<hls::vector<data_t,NPARAMS>, NHITS> X_t;
-// typedef hls::vector<hls::vector<data_t,NPARHID>, NHITS> H_t;
-// typedef hls::vector<hls::vector<data_t,NPARHID2>, NHITS> H2_t;
-// typedef hls::vector<hls::vector<data_t,NPARHID3>, NHITS> H3_t;
-// typedef hls::vector<hls::vector<data_t,NPARHID>, NHITS> inner_t;
-// typedef hls::vector<hls::vector<R_data_t,NEDGES>, NHITS> R_t;
-
-// typedef hls::vector<hls::vector<R_data_t,NHITS>, NEDGES> R_tr_t;
-
-// typedef hls::vector<hls::vector<data_t,NPARHID>, NEDGES> b_t;
-// typedef hls::vector<hls::vector<data_t,NPARHID2>, NEDGES> B_t;
-
-// typedef hls::vector<data_t, NEDGES> e_t;
+}
 
 #endif

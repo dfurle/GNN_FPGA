@@ -6,7 +6,7 @@
 
 namespace node_net{
 
-void node_runner(par3_t M[NEDGES], par_t H_out[NHITS]);
+void node_runner(par3_t M[NHITS], par_t H_out[NHITS]);
 void node_network_s(input_t dense_node_1_input[N_INPUT_1_1], result_t layer11_out[N_LAYER_8]);
 
 void createM(par_t H[NHITS], data_t e[NEDGES], ei_t edge_index, par3_t M[NHITS]);
@@ -27,7 +27,7 @@ void node_network(par_t H[NHITS], ei_t edge_index, data_t e[NEDGES], par_t Hout[
   // #pragma HLS INLINE off
 
   par3_t M[NHITS];
-  #pragma HLS ARRAY_PARTITION variable=M complete
+  // #pragma HLS ARRAY_PARTITION variable=M
   node_net::createM(H, e, edge_index, M);
 
   node_net::node_runner(M, Hout);
@@ -43,7 +43,7 @@ void createM(par_t H[NHITS], data_t e[NEDGES], ei_t edge_index, par3_t M[NHITS])
 CREATE_M_ZERO_LOOP:
   for(int node = 0; node < NHITS; node++){
     // #pragma HLS unroll factor=1
-    #pragma HLS unroll
+    // #pragma HLS unroll
     for(int par = 0; par < NPARHID; par++){
       #pragma HLS unroll
       M[node][0][par] = 0;
@@ -52,10 +52,30 @@ CREATE_M_ZERO_LOOP:
     }
   }
 
+  // CPU/PCIe ( 2GB/s )
+  //  |
+  //  |
+  //  | (can read ~75MB/s (or maybe only ~50MB/s))
+  //   |     - (for 16 Burst Length with 64 Latency?)
+  //  \-> Splitter/Returner FPGA <----------------------------\ 
+  //     |                                                    |
+  //     |                                                    |
+  //     \-> Graph Construction                               |
+  //             |                                            |
+  //             |            (time estimate after pipeline)  |
+  //             |                                            |
+  //             \/  (~1KB of data / ~(122*5ns)) (~1.6GB/s)   |
+  //         Neural Network                                   |
+  //                \-----------------------------------------/
+
+
 CREATE_M_1EDGE_LOOP:
   for(int edge = 0; edge < NEDGES; edge++){
+    // #pragma HLS PIPELINE II=4 // was throwing errors until II=4 so TODO: try lowering? or something
     #pragma HLS PIPELINE
-    // #pragma HLS unroll factor=10
+    
+    // #pragma HLS PIPELINE off
+    // #pragma HLS unroll factor=1
     // #pragma HLS unroll
 
     i_data_t src_node = edge_index[edge*2];
@@ -68,14 +88,62 @@ CREATE_M_1EDGE_LOOP:
 
     par_t tmp_MD = M[dst_node][0];
     par_t tmp_MS = M[src_node][1];
-    M[dst_node][0] = tmp_MD + (H[src_node] * edge_mult);
-    M[src_node][1] = tmp_MS + (H[dst_node] * edge_mult);
+    par_t tmp_Hs = H[src_node];
+    par_t tmp_Hd = H[dst_node];
+
+    // par_t tmp1 = tmp_MD + (tmp_Hs * edge_mult);
+    // par_t tmp2 = tmp_MS + (tmp_Hd * edge_mult);
+    // M[dst_node][0] = tmp1;
+    // M[src_node][1] = tmp2;
+
+    M[dst_node][0] = tmp_MD + (tmp_Hs * edge_mult);
+    M[src_node][1] = tmp_MS + (tmp_Hd * edge_mult);
   }
+
+// CREATE_M_1EDGE_LOOP_FIRST:
+//   for(int edge = 0; edge < NEDGES; edge++){
+//     #pragma HLS PIPELINE off
+//     #pragma HLS unroll factor=1
+//     // #pragma HLS unroll
+
+//     i_data_t src_node = edge_index[edge*2];
+//     i_data_t dst_node = edge_index[edge*2 + 1];
+//     data_t edge_mult = e[edge];
+
+//     if(src_node != i_data_t(-1)){
+//       continue;
+//     }
+
+//     par_t tmp_MD = M[dst_node][0];
+//     par_t tmp_MS = M[src_node][1];
+//     M[dst_node][0] = tmp_MD + (H[src_node] * edge_mult);
+//     M[src_node][1] = tmp_MS + (H[dst_node] * edge_mult);
+//   }
+
+// CREATE_M_1EDGE_LOOP_SECOND:
+//   for(int edge = 0; edge < NEDGES; edge++){
+//     // #pragma HLS PIPELINE
+//     #pragma HLS unroll factor=1
+//     // #pragma HLS unroll
+
+//     i_data_t src_node = edge_index[edge*2];
+//     i_data_t dst_node = edge_index[edge*2 + 1];
+//     data_t edge_mult = e[edge];
+
+//     if(src_node != i_data_t(-1)){
+//       continue;
+//     }
+
+//     par_t tmp_MD = M[dst_node][0];
+//     par_t tmp_MS = M[src_node][1];
+//     M[dst_node][0] = tmp_MD + (H[src_node] * edge_mult);
+//     M[src_node][1] = tmp_MS + (H[dst_node] * edge_mult);
+//   }
 
 CREATE_M_3NODE_LOOP:
   for(int node = 0; node < NHITS; node++){
     // #pragma HLS unroll factor=1
-    #pragma HLS unroll
+    // #pragma HLS unroll
 
     for(int par = 0; par < NPARHID; par++){
       // #pragma HLS unroll factor=1
@@ -87,13 +155,13 @@ CREATE_M_3NODE_LOOP:
 
 
 void node_runner(par3_t M[NHITS], par_t H[NHITS]){
-  // #pragma HLS PIPELINE
+  #pragma HLS PIPELINE
   node_net::input_t in1[N_INPUT_1_1];
   node_net::result_t out1[N_LAYER_8];
 
 NODE_R_HIT_LOOP:
   for(int i = 0; i < NHITS; i++){
-    #pragma HLS unroll factor=1
+    // #pragma HLS unroll factor=1
     for(int j = 0; j < N_INPUT_1_1; j++){
       #pragma HLS unroll
       in1[j] = M[i][j/NPARHID][j%NPARHID];

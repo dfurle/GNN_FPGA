@@ -44,6 +44,16 @@ void runGraphNetwork(hls::stream<data_t>& in_X_stream, hls::stream<i_data_t>& in
     X[i] = in_X_stream.read();
   }
 
+    // |+ runGraphNetwork                                                        |  Timing|  -0.57|     3624|  1.812e+04|         -|     3625|     -|        no|  21 (~0%)|  1464 (21%)|  145707 (6%)|  116327 (9%)|    -|
+    // | + createM                                                               |  Timing|  -0.04|     1335|  6.675e+03|         -|     1335|     -|        no|         -|    10 (~0%)|   24625 (1%)|   20605 (1%)|    -|
+    // |  + createM_Pipeline_CREATE_M_ZERO_LOOP                                  |       -|   2.11|      152|    760.000|         -|      152|     -|        no|         -|           -|     10 (~0%)|     57 (~0%)|    -|
+    // |   o CREATE_M_ZERO_LOOP                                                  |       -|   4.40|      150|    750.000|         1|        1|   150|       yes|         -|           -|            -|            -|    -|
+    // |  + createM_Pipeline_CREATE_M_1EDGE_LOOP                                 |  Timing|  -0.04|     1026|  5.130e+03|         -|     1026|     -|        no|         -|    10 (~0%)|    427 (~0%)|   12425 (1%)|    -|
+    // |   o CREATE_M_1EDGE_LOOP                                                 |      II|   4.40|     1024|  5.120e+03|         4|        4|   256|       yes|         -|           -|            -|            -|    -|
+    // |  + createM_Pipeline_CREATE_M_3NODE_LOOP                                 |       -|   2.00|      152|    760.000|         -|      152|     -|        no|         -|           -|    179 (~0%)|   7978 (~0%)|    -|
+    // |   o CREATE_M_3NODE_LOOP                                                 |       -|   4.40|      150|    750.000|         2|        1|   150|       yes|         -|           -|            -|            -|    -|
+    // | + node_runner         
+
 
   // printf("\n\n");
   // printf("X input:\n");
@@ -56,14 +66,16 @@ void runGraphNetwork(hls::stream<data_t>& in_X_stream, hls::stream<i_data_t>& in
   // }
   // printf("\n\n");
 
-
   int valid_edges = 0;
-  ei_t ei;
+  i_data_t ei[NEDGES*2];
+  #pragma HLS ARRAY_PARTITION variable=ei complete
   for(int i = 0; i < NEDGES * 2; i++){
     #pragma HLS PIPELINE
     ei[i] = in_ei_stream.read();
-    if(ei[i] == i_data_t(-1) && valid_edges == 0)
+    if(ei[i] == i_data_t(-1) && valid_edges == 0){
       valid_edges = i/2;
+      // keep reading stream to finish
+    }
   }
 
   // printf("\n\n");
@@ -88,6 +100,10 @@ void runGraphNetwork(hls::stream<data_t>& in_X_stream, hls::stream<i_data_t>& in
   par_t H_1[NHITS];
   #pragma HLS ARRAY_PARTITION variable=H_1 complete
 
+  par_t inbound[NEDGES];
+  par_t outbound[NEDGES];
+  // #pragma HLS ARRAY_PARTITION variable=B complete
+
 input:
   input_network(X, H_0);
 
@@ -102,8 +118,8 @@ input:
   // printf("\n\n");
   
 pass1:
-  edge_network(H_0, ei, e, valid_edges);
-  node_network(H_0, ei, e, H_1);
+  edge_network(H_0, ei, e, valid_edges, inbound, outbound);
+  node_network(H_0, ei, e, H_1, inbound, outbound);
 
 // pass2:
 //   edge_network(H_1, ei_arr, e_arr, valid_edges);
@@ -114,7 +130,7 @@ pass1:
 //   node_network(H_0, ei_arr, e_arr, H_1);
 
 final:
-  edge_network(H_1, ei, e, valid_edges);
+  edge_network(H_1, ei, e, valid_edges, inbound, outbound);
 
 
   for(int i = 0; i < NEDGES; i++){

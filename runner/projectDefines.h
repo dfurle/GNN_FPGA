@@ -8,7 +8,8 @@
 
 
 #define NHITS  150
-#define NEDGES 256
+// #define NEDGES 256
+#define NEDGES 200
 // #define NHITS  21
 // #define NEDGES 42
 #define NPARAMS  2

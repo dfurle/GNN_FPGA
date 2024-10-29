@@ -15,6 +15,7 @@ int main(int argc, char* argv[]){
   data_t e[NEDGES];
   data_t e_true[NEDGES];
 
+  // std::ifstream file("../tb_files/tb_inputs.dat");
   std::ifstream file("tb_inputs.dat");
   if(file.is_open()){
     std::string sa;
@@ -49,10 +50,10 @@ int main(int argc, char* argv[]){
   int counter = 1;
   printf("True Outs:\n");
   for (int i = 0; i < NEDGES; i++) {
-    if(float(e[i]) == 0)
+    if(float(e_true[i]) == 0)
       printf("_      ");
     else
-    printf("1      ");
+      printf("1      ");
     if(counter++ % 10 == 0)
       printf("\n");
   }

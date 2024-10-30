@@ -296,16 +296,10 @@ void node_runner(i_data_t edge_index[NEDGES*2], data_t e[NEDGES], par_t inbound[
     AGGREGATE_TO_IN1:
     for(int j = 0; j < NPARHID; j++){
       #pragma HLS unroll
-      in1[j]           = sum_out[j];
-      in1[j+NPARHID]   = sum_in[j];
+      in1[j]           = sum_in[j];
+      in1[j+NPARHID]   = sum_out[j];
       in1[j+NPARHID*2] = H[i][j];
     }
-
-    printf("H%d: ", i);
-    for(int j = 0; j < N_INPUT_1_1; j++){
-      printf("%.2f, ", float(in1[j]));
-    }
-    printf("\n");
 
     node_network_s(in1, out1);
 

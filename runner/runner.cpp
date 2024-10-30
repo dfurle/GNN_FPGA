@@ -124,13 +124,6 @@ input:
   
 pass1:
   edge_network(H_0, ei, e, valid_edges, inbound, outbound);
-
-  printf("EDGES: \n");
-  for(int i = 0; i < NEDGES; i++){
-    printf("%.2f, ", float(e[i]));
-  }
-  printf("\n");
-
   node_network(H_0, ei, e, H_1, inbound, outbound);
 
 // pass2:

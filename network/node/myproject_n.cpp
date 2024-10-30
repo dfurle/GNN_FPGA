@@ -275,6 +275,11 @@ void node_runner(i_data_t edge_index[NEDGES*2], data_t e[NEDGES], par_t inbound[
     for(int edge = 0; edge < NEDGES; edge++){
       i_data_t src = edge_index[2*edge];
       i_data_t dst = edge_index[2*edge+1];
+
+      if(src == -1){
+        break;
+      }
+
       data_t e_mult = e[edge];
       par_t in = inbound[edge];
       par_t out = outbound[edge];

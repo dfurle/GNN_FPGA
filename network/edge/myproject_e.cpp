@@ -118,6 +118,10 @@ EDGE_R_EDGE_LOOP:
     i_data_t src = edge_index[2*i];
     i_data_t dst = edge_index[2*i+1];
 
+    if(src == -1){
+      break;
+    }
+
     par_t Hsrc = H[src];
     par_t Hdst = H[dst];
     inbound[i] = Hsrc;

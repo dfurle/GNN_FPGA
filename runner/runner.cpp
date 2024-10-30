@@ -104,6 +104,11 @@ void runGraphNetwork(hls::stream<data_t>& in_X_stream, hls::stream<i_data_t>& in
   par_t outbound[NEDGES];
   // #pragma HLS ARRAY_PARTITION variable=B complete
 
+  for(int i = 0; i < NEDGES; i++){
+    inbound[i] = par_t(0);
+    outbound[i] = par_t(0);
+  }
+
 input:
   input_network(X, H_0);
 
@@ -119,6 +124,13 @@ input:
   
 pass1:
   edge_network(H_0, ei, e, valid_edges, inbound, outbound);
+
+  printf("EDGES: \n");
+  for(int i = 0; i < NEDGES; i++){
+    printf("%.2f, ", float(e[i]));
+  }
+  printf("\n");
+
   node_network(H_0, ei, e, H_1, inbound, outbound);
 
 // pass2:

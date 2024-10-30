@@ -269,8 +269,8 @@ void node_runner(i_data_t edge_index[NEDGES*2], data_t e[NEDGES], par_t inbound[
     //   in1[j+NPARHID*2] = H[i][j];
     // }
 
-    par_t sum_in;
-    par_t sum_out;
+    par_t sum_in(0);
+    par_t sum_out(0);
 
     for(int edge = 0; edge < NEDGES; edge++){
       i_data_t src = edge_index[2*edge];
@@ -300,6 +300,12 @@ void node_runner(i_data_t edge_index[NEDGES*2], data_t e[NEDGES], par_t inbound[
       in1[j+NPARHID]   = sum_in[j];
       in1[j+NPARHID*2] = H[i][j];
     }
+
+    printf("H%d: ", i);
+    for(int j = 0; j < N_INPUT_1_1; j++){
+      printf("%.2f, ", float(in1[j]));
+    }
+    printf("\n");
 
     node_network_s(in1, out1);
 

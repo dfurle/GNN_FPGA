@@ -14,6 +14,7 @@ int main(int argc, char* argv[]){
   // i_data_t edge_i[NEDGES * 2];
   data_t e[NEDGES];
   data_t e_true[NEDGES];
+  data_t e_pyth[NEDGES];
 
   // std::ifstream file("../tb_files/tb_inputs.dat");
   std::ifstream file("tb_inputs.dat");
@@ -21,16 +22,24 @@ int main(int argc, char* argv[]){
     std::string sa;
     for(int i = 0; i < NHITS * NPARAMS; i++){ // X
       getline(file, sa);
+      printf("> n:%i [%s]\n", i/NPARAMS, sa.c_str());
       X_stream.write(std::stof(sa));
     }
     for(int i = 0; i < NEDGES * 2; i++){ // ei
       getline(file, sa);
       // edge_i[i] = std::stoi(sa);
+      printf("> i:%i [%s]\n", i/2, sa.c_str());
       ei_stream.write(std::stof(sa));
     }
     for(int i = 0; i < NEDGES; i++){ // e
       getline(file, sa);
+      printf("> i:%i [%s]\n", i, sa.c_str());
       e_true[i] = std::stof(sa);
+    }
+    for(int i = 0; i < NEDGES; i++){ // e pytorch preds
+      getline(file, sa);
+      printf("> i:%i [%s]\n", i, sa.c_str());
+      e_pyth[i] = std::stof(sa);
     }
   } else {
     printf("!!! Can't open input file!!\n");
@@ -60,6 +69,18 @@ int main(int argc, char* argv[]){
   printf("\n\n");
 
   counter = 1;
+  printf("Pyth Outs:\n");
+  for (int i = 0; i < NEDGES; i++) {
+    if(float(e_pyth[i]) == 0)
+      printf("_      ");
+    else
+      printf("%5.3f  ", float(e_pyth[i]));
+    if(counter++ % 10 == 0)
+      printf("\n");
+  }
+  printf("\n\n");
+
+  counter = 1;
   printf("Pred Outs:\n");
   for (int i = 0; i < NEDGES; i++) {
     if(float(e[i]) == 0)
@@ -73,12 +94,12 @@ int main(int argc, char* argv[]){
 
 
   counter = 1;
-  printf("Diff True-Pred:\n");
+  printf("Diff Pyth-Pred:\n");
   for (int i = 0; i < NEDGES; i++) {
     if(float(e[i]) == 0)
       printf(" _     ");
     else
-    printf("%5.2f  ", float(e_true[i] - e[i]));
+    printf("%5.2f  ", float(e_pyth[i] - e[i]));
     if(counter++ % 10 == 0)
       printf("\n");
   }

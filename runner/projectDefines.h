@@ -9,10 +9,10 @@
 
 #define NHITS  150
 // #define NEDGES 256
-#define NEDGES 200
+#define NEDGES 250
 // #define NHITS  21
 // #define NEDGES 42
-#define NPARAMS  2
+#define NPARAMS  3
 #define NHIDDEN  8
 
 // #define STREAM
@@ -24,9 +24,9 @@
 // #define DISABLE_NODE
 
 // dont forget to update if NPARAMS or NHIDDEN changed
-#define NPARHID  10 //NPARAMS + NHIDDEN
-#define NPARHID2 20 //NPARHID + NPARHID
-#define NPARHID3 30 //NPARHID + NPARHID + NPARHID
+#define NPARHID  11 //NPARAMS + NHIDDEN
+#define NPARHID2 22 //NPARHID + NPARHID
+#define NPARHID3 33 //NPARHID + NPARHID + NPARHID
 
 typedef ap_fixed<16,6> data_t;
 typedef ap_uint<8> i_data_t; // max nodes: 256

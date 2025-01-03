@@ -2,4 +2,6 @@ build
 *build
 build*
 
+network_*
+
 !template_build

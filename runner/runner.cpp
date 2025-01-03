@@ -58,6 +58,7 @@ void runGraphNetwork(hls::stream<data_t>& in_X_stream, hls::stream<i_data_t>& in
   // printf("\n\n");
   // printf("X input:\n");
   // for(int i = 0; i < NHITS; i++){
+  //   printf("%3d: ", i);
   //   for(int j = 0; j < NPARAMS; j++){
   //     // printf("%.3f, ", float(X[i][j]));
   //     std::cout << X[i*NPARAMS + j] << ", ";
@@ -123,16 +124,76 @@ input:
   // printf("\n\n");
   
 pass1:
+
   edge_network(H_0, ei, e, valid_edges, inbound, outbound);
+
+
+  // printf("inbound[0]:\n");
+  // for(int i = 0; i < NPARHID; i++){
+  //   printf("%.3f, ", float(inbound[0][i]));
+  // }
+  // printf("\n");
+  // printf("outbound[0]:\n");
+  // for(int i = 0; i < NPARHID; i++){
+  //   printf("%.3f, ", float(outbound[0][i]));
+  // }
+  // printf("\n\n");
+
+  // printf("e first:\n");
+  // for(int i = 0; i < NEDGES; i++){
+  //   printf("%.3f, ", float(e[i]));
+  //   if(i % 9 == 8)
+  //     printf("\n");
+  // }
+  // printf("\n\n");
+
   node_network(H_0, ei, e, H_1, inbound, outbound);
 
-// pass2:
-//   edge_network(H_1, ei_arr, e_arr, valid_edges);
-//   node_network(H_1, ei_arr, e_arr, H_0);
+  // printf("H_1 first:\n");
+  // for(int i = 0; i < NHITS; i++){
+  //   for(int j = 0; j < NPARHID; j++){
+  //     printf("%.3f, ", float(H_1[i][j]));
+  //   }
+  //   printf("\n");
+  // }
+  // printf("\n\n");
 
-// pass3:
-//   edge_network(H_0, ei_arr, e_arr, valid_edges);
-//   node_network(H_0, ei_arr, e_arr, H_1);
+pass2:
+  edge_network(H_1, ei, e, valid_edges, inbound, outbound);
+
+  // printf("e second:\n");
+  // for(int i = 0; i < NEDGES; i++){
+  //   printf("%.3f, ", float(e[i]));
+  //   if(i % 9 == 8)
+  //     printf("\n");
+  // }
+  // printf("\n\n");
+
+  node_network(H_1, ei, e, H_0, inbound, outbound);
+
+
+  // printf("H_0 second:\n");
+  // for(int i = 0; i < NHITS; i++){
+  //   for(int j = 0; j < NPARHID; j++){
+  //     printf("%.3f, ", float(H_0[i][j]));
+  //   }
+  //   printf("\n");
+  // }
+  // printf("\n\n");
+
+
+pass3:
+  edge_network(H_0, ei, e, valid_edges, inbound, outbound);
+
+  // printf("e third:\n");
+  // for(int i = 0; i < NEDGES; i++){
+  //   printf("%.3f, ", float(e[i]));
+  //   if(i % 9 == 8)
+  //     printf("\n");
+  // }
+  // printf("\n\n");
+
+  node_network(H_0, ei, e, H_1, inbound, outbound);
 
 final:
   edge_network(H_1, ei, e, valid_edges, inbound, outbound);

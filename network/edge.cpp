@@ -2,7 +2,7 @@
 
 
 namespace edge_net{
-  void edge_network_s(input_t input_1[N_INPUT_1_1], result_t layer7_out[N_LAYER_6]);
+  void edge_network_s(input_t input_1[NPARHID2], result_t layer7_out[1]);
 }
 
 
@@ -12,6 +12,7 @@ namespace edge_net{
 
 void edge_network(par_t H[NHITS], i_data_t edge_index[NEDGES*2], data_t e[NEDGES], int valid_edges, par_t inbound[NEDGES], par_t outbound[NEDGES]){
   edge_net::edge_runner(H, edge_index, e, inbound, outbound);
+
   SET_INVALID_EDGES:
   for(int i = NEDGES-1; i >= 0; i--){
     #pragma HLS UNROLL
@@ -26,8 +27,8 @@ namespace edge_net{
 void edge_runner(par_t H[NHITS], i_data_t edge_index[NEDGES*2], data_t e[NEDGES], par_t inbound[NEDGES], par_t outbound[NEDGES]){
   // #pragma HLS INLINE off
   // #pragma HLS PIPELINE
-  edge_net::input_t in1[N_INPUT_1_1];
-  edge_net::result_t out1[N_LAYER_6];
+  edge_net::input_t in1[NPARHID2];
+  edge_net::result_t out1[1];
 
 EDGE_R_EDGE_LOOP:
   for(int i = 0; i < NEDGES; i++){
@@ -56,10 +57,12 @@ EDGE_R_EDGE_LOOP:
 
     edge_network_s(in1, out1);
 
-    for(int j = 0; j < N_LAYER_6; j++){
-      #pragma HLS unroll
-      e[i] = out1[j];
-    }
+    e[i] = out1[0];
+
+    // for(int j = 0; j < N_LAYER_6; j++){
+    //   #pragma HLS unroll
+    //   e[i] = out1[j];
+    // }
   }
 }
 }

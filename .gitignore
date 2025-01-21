@@ -5,3 +5,4 @@ build*
 network_*
 
 !template_build
+tb_files/

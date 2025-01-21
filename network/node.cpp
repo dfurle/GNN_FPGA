@@ -2,7 +2,7 @@
 
 
 namespace node_net{
-  void node_network_s(input_t input_1[N_INPUT_1_1], result_t layer5_out[N_LAYER_4]);
+  void node_network_s(input_t input_1[NPARHID3], result_t layer5_out[NPARHID]);
 }
 
 namespace node_net{
@@ -17,8 +17,8 @@ namespace node_net{
 
 void node_runner(i_data_t edge_index[NEDGES*2], data_t e[NEDGES], par_t inbound[NEDGES], par_t outbound[NEDGES], par_t H[NHITS], par_t H_out[NHITS]){
   // #pragma HLS PIPELINE
-  node_net::input_t in1[N_INPUT_1_1];
-  node_net::result_t out1[N_LAYER_4];
+  node_net::input_t in1[NPARHID3];
+  node_net::result_t out1[NPARHID];
   #pragma HLS ARRAY_PARTITION variable=in1 complete dim=0
   #pragma HLS ARRAY_PARTITION variable=out1 complete dim=0
 
@@ -40,6 +40,7 @@ void node_runner(i_data_t edge_index[NEDGES*2], data_t e[NEDGES], par_t inbound[
     // printf("NODE [%d] ---------\n", i);
 
     for(int edge = 0; edge < NEDGES; edge++){
+      // #pragma HLS PIPELINE
       i_data_t src = edge_index[2*edge];
       i_data_t dst = edge_index[2*edge+1];
 
@@ -59,8 +60,7 @@ void node_runner(i_data_t edge_index[NEDGES*2], data_t e[NEDGES], par_t inbound[
         // }
         // printf("\n");
         sum_out = sum_out + out * e_mult;
-      }
-      if(dst == i_data_t(i)){
+      } else if(dst == i_data_t(i)){
         // printf("edge (dst, sum_in ) %d --> [%d, %d]\n", edge, src, dst);
         // printf(" ");
         // for(int i = 0; i < NPARHID; i++){
@@ -100,7 +100,7 @@ void node_runner(i_data_t edge_index[NEDGES*2], data_t e[NEDGES], par_t inbound[
 
     node_network_s(in1, out1);
 
-    for(int j = 0; j < N_LAYER_4; j++){
+    for(int j = 0; j < NHIDDEN; j++){
       #pragma HLS unroll
       H_out[i][j] = out1[j];
     }

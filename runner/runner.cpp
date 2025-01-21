@@ -78,6 +78,9 @@ void runGraphNetwork(hls::stream<data_t>& in_X_stream, hls::stream<i_data_t>& in
       // keep reading stream to finish
     }
   }
+  if(valid_edges == 0){
+    valid_edges = NEDGES;
+  }
 
   // printf("\n\n");
   // printf("ei input:\n");

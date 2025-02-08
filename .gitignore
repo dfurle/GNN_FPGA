@@ -7,3 +7,10 @@ network_*
 !template_build
 tb_files/
 network/fpga_data
+Z_plots/*
+!Z_plots/tools/
+Notes.md
+parse.py
+*.pt
+rename.sh
+*.so

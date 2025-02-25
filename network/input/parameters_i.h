@@ -18,6 +18,8 @@ namespace input_net{
 #include "weights_i/b2.h"
 #include "weights_i/w4.h"
 #include "weights_i/b4.h"
+#include "weights_i/w6.h"
+#include "weights_i/b6.h"
 #undef __SYNTHESIS__
 
 // hls-fpga-machine-learning insert layer-config
@@ -75,6 +77,34 @@ struct ReLU_config5 : nnet::activ_config {
     static const unsigned io_type = nnet::io_parallel;
     static const unsigned reuse_factor = 1;
     typedef _1_block_1_table_t table_t;
+};
+
+// _2_block_0
+struct config6 : nnet::dense_config {
+    static const unsigned n_in = 8;
+    static const unsigned n_out = 8;
+    static const unsigned io_type = nnet::io_parallel;
+    static const unsigned strategy = nnet::latency;
+    static const unsigned reuse_factor = 1;
+    static const unsigned n_zeros = 0;
+    static const unsigned n_nonzeros = 64;
+    static const unsigned multiplier_limit = DIV_ROUNDUP(n_in * n_out, reuse_factor) - n_zeros / reuse_factor;
+    static const bool store_weights_in_bram = false;
+    typedef model_default_t accum_t;
+    typedef model_default_t bias_t;
+    typedef model_default_t weight_t;
+    typedef layer6_index index_t;
+    template<class x_T, class y_T>
+    using product = nnet::product::mult<x_T, y_T>;
+};
+
+// _2_block_1
+struct ReLU_config7 : nnet::activ_config {
+    static const unsigned n_in = 8;
+    static const unsigned table_size = 1024;
+    static const unsigned io_type = nnet::io_parallel;
+    static const unsigned reuse_factor = 1;
+    typedef _2_block_1_table_t table_t;
 };
 
 

@@ -1,0 +1,11 @@
+-I/opt/xilinx/xrt/include
+-I/hdd/Xilinx/Vitis_HLS/2023.2/include/
+-I/hdd/Xilinx/Vitis_HLS/2023.2/include/etc/
+-I./network/firmware
+-I./network/input
+-I./network/node
+-I./network/edge
+-I./runner
+-I.
+-xc++
+-std=c++11

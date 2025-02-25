@@ -114,7 +114,7 @@ void runFPGA(std::string filename, bool doprint, std::vector<float>& _e_pred, st
       if(abs(float(e_pyth[i]) - float(e[i])) <= 0.01) // error 0.01 to just zero off
         printf(" _     ");
       else
-      printf("%5.2f  ", float(e_pyth[i]) - float(e[i]));
+        printf("%5.2f  ", float(e_pyth[i]) - float(e[i]));
       if(counter++ % 10 == 0)
         printf("\n");
     }
@@ -126,12 +126,24 @@ void runFPGA(std::string filename, bool doprint, std::vector<float>& _e_pred, st
       if(abs(float(e_true[i]) - float(e[i])) <= 0.01)
         printf(" _     ");
       else
-      printf("%5.2f  ", float(e_true[i]) - float(e[i]));
+        printf("%5.2f  ", float(e_true[i]) - float(e[i]));
       if(counter++ % 10 == 0)
         printf("\n");
     }
     printf("\n\n");
   }
+
+  std::ofstream file_write("../../../../../../py_event_preds.txt");
+  if(file_write.is_open()){
+    for(int i = 0; i < NEDGES; i++){
+      file_write << std::to_string(float(e[i])) << " ";
+    }
+    file_write << "\n";
+    file_write.close();
+  } else {
+    printf("Failed to open preds file for writing!!\n");
+  }
+  
 
 }
 
@@ -146,10 +158,14 @@ int main(int argc, char* argv[]){
   std::vector<float> e_pyth;
 
 
-  int numTestGraphs = 100;
+  int numTestGraphs = 10;
   for(int i = 0; i < numTestGraphs; i++){
     runFPGA("fpga_data/tb_inputs_" + std::to_string(i) + ".dat", false, e_pred, e_true, e_pyth);
   }
+
+  // printf("Opening file: \n\n\n\n");
+  // runFPGA("fpga_data/tb_inputs_0.dat", false, e_pred, e_true, e_pyth);
+
 
   int length = e_pred.size();
   printf("Length: %d\n", length);

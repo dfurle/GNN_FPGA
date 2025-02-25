@@ -13,6 +13,8 @@ namespace node_net{
 #define N_LAYER_2 8
 #define N_LAYER_4 8
 #define N_LAYER_4 8
+#define N_LAYER_6 8
+#define N_LAYER_6 8
 
 // hls-fpga-machine-learning insert layer-precision
 typedef ap_fixed<16,6> input_t;
@@ -23,7 +25,11 @@ typedef ap_fixed<16,6> layer3_t;
 typedef ap_fixed<18,8> _0_block_1_table_t;
 typedef ap_fixed<16,6> layer4_t;
 typedef ap_uint<1> layer4_index;
-typedef ap_fixed<16,6> result_t;
+typedef ap_fixed<16,6> layer5_t;
 typedef ap_fixed<18,8> _1_block_1_table_t;
+typedef ap_fixed<16,6> layer6_t;
+typedef ap_uint<1> layer6_index;
+typedef ap_fixed<16,6> result_t;
+typedef ap_fixed<18,8> _2_block_1_table_t;
 
 }

@@ -13,14 +13,12 @@
 
 // hls-fpga-machine-learning insert weights
 namespace input_net{
-#define __SYNTHESIS__
 #include "weights_i/w2.h"
 #include "weights_i/b2.h"
 #include "weights_i/w4.h"
 #include "weights_i/b4.h"
 #include "weights_i/w6.h"
 #include "weights_i/b6.h"
-#undef __SYNTHESIS__
 
 // hls-fpga-machine-learning insert layer-config
 // _0_block_0

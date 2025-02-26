@@ -62,7 +62,7 @@
 
 
 // typedef ap_fixed<16,6> data_t;
-typedef ap_fixed<16,9> data_t;
+typedef ap_fixed<24,9> data_t;
 // typedef ap_fixed<24, 12> data_t;
 typedef ap_uint<8> i_data_t; // max nodes: 256
 

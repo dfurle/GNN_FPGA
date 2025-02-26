@@ -13,14 +13,12 @@
 
 // hls-fpga-machine-learning insert weights
 namespace edge_net{
-#define __SYNTHESIS__
 #include "weights_e/w2.h"
 #include "weights_e/b2.h"
 #include "weights_e/w4.h"
 #include "weights_e/b4.h"
 #include "weights_e/w6.h"
 #include "weights_e/b6.h"
-#undef __SYNTHESIS__
 
 // hls-fpga-machine-learning insert layer-config
 // _0_block_0

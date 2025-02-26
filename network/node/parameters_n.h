@@ -13,14 +13,12 @@
 
 // hls-fpga-machine-learning insert weights
 namespace node_net{
-#define __SYNTHESIS__
 #include "weights_n/w2.h"
 #include "weights_n/b2.h"
 #include "weights_n/w4.h"
 #include "weights_n/b4.h"
 #include "weights_n/w6.h"
 #include "weights_n/b6.h"
-#undef __SYNTHESIS__
 
 // hls-fpga-machine-learning insert layer-config
 // _0_block_0

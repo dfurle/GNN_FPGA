@@ -20,8 +20,8 @@
 // #define DIST_INTERLAYER data_t(7.33)
 // #define Z_275_SPLIT data_t(275)
 
-#define THETA_MAX_LONG 0.700   // 35deg
-#define THETA_MAX_SHORT 1.19175   // 50 deg
+#define THETA_MAX_LONG 0.49   // tan(35deg)^2 = (0.7)^2
+#define THETA_MAX_SHORT 1.420268   // tan(50 deg)^2 = (1.19175)^2
 #define MAX_DIST 6400  // 80^2
 #define DIST_LAYER 5.5
 #define SIZE_LAYER 15.0
@@ -32,19 +32,22 @@
 
 int to_graph(data_t X[NHITS * NPARAMS], i_data_t ei[NEDGES*2]){
 
+  int counter = 0;
   for(int i = 0; i < NEDGES*2; i++){
+    #pragma HLS UNROLL
     ei[i] = i_data_t(-1);
   }
   
-  int counter = 0;
+
   for(int i = 0; i < NHITS; i++){
+    data_t hit1_x = X[NPARAMS*i+0];
+    data_t hit1_y = X[NPARAMS*i+1];
+    data_t hit1_z = X[NPARAMS*i+2];
     for(int j = 0; j < NHITS; j++){
+      // #pragma HLS PIPELINE
+      #pragma HLS UNROLL factor=10
       if(counter >= NEDGES)
         break;
-
-      data_t hit1_x = X[NPARAMS*i+0];
-      data_t hit1_y = X[NPARAMS*i+1];
-      data_t hit1_z = X[NPARAMS*i+2];
       data_t hit2_x = X[NPARAMS*j+0];
       data_t hit2_y = X[NPARAMS*j+1];
       data_t hit2_z = X[NPARAMS*j+2];
@@ -63,7 +66,7 @@ int to_graph(data_t X[NHITS * NPARAMS], i_data_t ei[NEDGES*2]){
       data_t diff_x = hit2_x - hit1_x;
       data_t diff_y = hit2_y - hit1_y;
       data_t diff_z = hit2_z - hit1_z;
-      data_t xy_mag = fsqrt(diff_x*diff_x + diff_y*diff_y);
+      data_t xy_mag2 = diff_x*diff_x + diff_y*diff_y;
       // data_t dist = xy_mag + diff_z*diff_z;
 
       // float diff_x = hit2_x - hit1_x;
@@ -84,7 +87,9 @@ int to_graph(data_t X[NHITS * NPARAMS], i_data_t ei[NEDGES*2]){
       if(diff_z <= 0)
         continue;
       // data_t theta = abs(float(xy_mag / diff_z));
-      float theta = abs(float(xy_mag / diff_z));
+      data_t theta = xy_mag2 / (diff_z*diff_z);
+      if(theta < 0)
+        theta = -theta;
       // printf("  Theta: %5.3f\n", float(theta));
 
       if(diff_z >= DIST_LAYER && theta > THETA_MAX_LONG)
@@ -108,6 +113,8 @@ int to_graph(data_t X[NHITS * NPARAMS], i_data_t ei[NEDGES*2]){
       counter++;
       // printf("\n");
     }
+    if(counter >= NEDGES)
+      break;
   }
   return counter;
 }

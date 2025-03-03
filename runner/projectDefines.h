@@ -14,7 +14,8 @@
 // #define NEDGES 42
 #define NPARAMS  3
 
-#define NHIDDEN  8 // original
+#include "variable_params.h"
+// #define NHIDDEN  8 // original
 // #define NHIDDEN  9
 // #define NHIDDEN  16
 // #define NHIDDEN  24
@@ -29,10 +30,13 @@
 // #define DISABLE_NODE
 
 // dont forget to update if NPARAMS or NHIDDEN changed
+#define NPARHID  (NHIDDEN + 3) //NPARAMS + NHIDDEN
+#define NPARHID2 ((NHIDDEN + 3) * 2) //NPARHID + NPARHID
+#define NPARHID3 ((NHIDDEN + 3) * 3) //NPARHID + NPARHID + NPARHID
 
-#define NPARHID  11 //NPARAMS + NHIDDEN
-#define NPARHID2 22 //NPARHID + NPARHID
-#define NPARHID3 33 //NPARHID + NPARHID + NPARHID
+// #define NPARHID  11 //NPARAMS + NHIDDEN
+// #define NPARHID2 22 //NPARHID + NPARHID
+// #define NPARHID3 33 //NPARHID + NPARHID + NPARHID
 // took 1927.84s to compile, ie 32 minutes, total 36m 21s
 // 24,841 Compile/Link
 // 2,023,874 Unroll/Inline

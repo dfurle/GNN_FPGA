@@ -4,11 +4,9 @@
 
 #include "projectDefines.h"
 
-#include <iostream>
+// #include <iostream>
 
 // #define RUN_PIPELINE
-
-
 
 // #define THETA_MAX_LONG data_t(0.700)   // 35deg
 // #define THETA_MAX_SHORT data_t(1.19175)   // 50 deg
@@ -20,6 +18,10 @@
 // #define DIST_INTERLAYER data_t(7.33)
 // #define Z_275_SPLIT data_t(275)
 
+// #define USE_TO_GRAPH
+
+#ifdef USE_TO_GRAPH
+
 #define THETA_MAX_LONG 0.49   // tan(35deg)^2 = (0.7)^2
 #define THETA_MAX_SHORT 1.420268   // tan(50 deg)^2 = (1.19175)^2
 #define MAX_DIST 6400  // 80^2
@@ -29,6 +31,22 @@
 #define DIST_MODULE_3_4 33.5
 #define DIST_INTERLAYER 7.33
 #define Z_275_SPLIT 99.0 // 275 - 176
+
+// seems to be very intensive if not completely unrolled
+// but if completely unrolled, does not compile (high resource probably)
+// will attempt a full compilation on jlab servers (compilation required more than my 32GB ram)
+//  - usually will end up using more FPGA resoruces than available
+// possiblility to split up NN and graph builder
+//  - 1st FPGA does graph building, (need more time to optimize), streams to next fpga
+//  - 2nd FPGA intakes the build graphs, has II of ~2.8us, already built
+//  - likely no time lost, only time lost due to bulk streaming read in/out which is fairly small
+// Another possible algorithm: run network during graph building
+//  - select node, connect all possible nodes, run network on that node
+//  - seems like a very slight optimization, might not work still though...
+//  - since we now need to aggregate (or even run) on same edge multiple times?
+//  May be bad due to bad array writing
+//  - write into NHITS*NHITS array, and then rewrite into smaller? idk if better or not
+
 
 int to_graph(data_t X[NHITS * NPARAMS], i_data_t ei[NEDGES*2]){
 
@@ -40,12 +58,13 @@ int to_graph(data_t X[NHITS * NPARAMS], i_data_t ei[NEDGES*2]){
   
 
   for(int i = 0; i < NHITS; i++){
+    #pragma HLS PIPELINE off
     data_t hit1_x = X[NPARAMS*i+0];
     data_t hit1_y = X[NPARAMS*i+1];
     data_t hit1_z = X[NPARAMS*i+2];
     for(int j = 0; j < NHITS; j++){
       // #pragma HLS PIPELINE
-      #pragma HLS UNROLL factor=10
+      #pragma HLS UNROLL
       if(counter >= NEDGES)
         break;
       data_t hit2_x = X[NPARAMS*j+0];
@@ -118,6 +137,7 @@ int to_graph(data_t X[NHITS * NPARAMS], i_data_t ei[NEDGES*2]){
   }
   return counter;
 }
+#endif
 
 
 void network_pass(int valid_edges, par_t H_in[NHITS], par_t H_out[NHITS], i_data_t ei_in[NEDGES*2], i_data_t ei_out[NEDGES*2]){
@@ -162,6 +182,7 @@ void runGraphNetwork(hls::stream<data_t>& in_X_stream, hls::stream<i_data_t>& in
   printf("\n\n\n\n\n\n");
   printf("Starting to_graph()\n");
 
+  #ifdef USE_TO_GRAPH
   i_data_t ei[NEDGES*2];
   #pragma HLS ARRAY_PARTITION variable=ei complete
   int valid_edges = to_graph(X, ei);
@@ -170,17 +191,17 @@ void runGraphNetwork(hls::stream<data_t>& in_X_stream, hls::stream<i_data_t>& in
 
   int valid_edges_true = 0;
   i_data_t ei_true[NEDGES*2];
-  #pragma HLS ARRAY_PARTITION variable=ei complete
+  #pragma HLS ARRAY_PARTITION variable=ei_true complete
   for(int i = 0; i < NEDGES * 2; i++){
     #pragma HLS PIPELINE
     ei_true[i] = in_ei_stream.read();
-    if(ei_true[i] == i_data_t(-1) && valid_edges == 0){
-      valid_edges = i/2;
+    if(ei_true[i] == i_data_t(-1) && valid_edges_true == 0){
+      valid_edges_true = i/2;
       // keep reading stream to finish
     }
   }
-  if(valid_edges == 0){
-    valid_edges = NEDGES;
+  if(valid_edges_true == 0){
+    valid_edges_true = NEDGES;
   }
 
   printf("EI True | EI Built\n");
@@ -198,6 +219,23 @@ void runGraphNetwork(hls::stream<data_t>& in_X_stream, hls::stream<i_data_t>& in
   } else {
     printf("\n\n SOME FAILED \n\n\n");
   }
+
+  #else
+  int valid_edges = 0;
+  i_data_t ei[NEDGES*2];
+  #pragma HLS ARRAY_PARTITION variable=ei complete
+  for(int i = 0; i < NEDGES * 2; i++){
+    #pragma HLS PIPELINE
+    ei[i] = in_ei_stream.read();
+    if(ei[i] == i_data_t(-1) && valid_edges == 0){
+      valid_edges = i/2;
+      // keep reading stream to finish
+    }
+  }
+  if(valid_edges == 0){
+    valid_edges = NEDGES;
+  }
+  #endif
 
   data_t e[NEDGES];
   #pragma HLS ARRAY_PARTITION variable=e complete
@@ -243,16 +281,10 @@ input:
   input_network(X, H_0);
 pass1:
   network_pass(valid_edges, H_0, H_1, ei, ei);
-  // edge_network(H_0, ei, inbound, outbound);
-  // node_network(H_0, H_1, inbound, outbound);
 pass2:
   network_pass(valid_edges, H_1, H_0, ei, ei);
-  // edge_network(H_1, ei, inbound, outbound);
-  // node_network(H_1, H_0, inbound, outbound);
 pass3:
   network_pass(valid_edges, H_0, H_1, ei, ei);
-  // edge_network(H_0, ei, inbound, outbound);
-  // node_network(H_0, H_1, inbound, outbound);
 final:
   edge_predictor(valid_edges, H_1, ei, e);
 

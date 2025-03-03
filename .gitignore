@@ -14,3 +14,6 @@ parse.py
 *.pt
 rename.sh
 *.so
+py_*.txt
+py_*.png
+*.csv

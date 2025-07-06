@@ -160,7 +160,7 @@ int main(int argc, char* argv[]){
 
   int numTestGraphs = 10;
   for(int i = 0; i < numTestGraphs; i++){
-    runFPGA("fpga_data/tb_inputs_" + std::to_string(i) + ".dat", false, e_pred, e_true, e_pyth);
+    runFPGA("fpga_data/tb_inputs_" + std::to_string(i) + ".dat", true, e_pred, e_true, e_pyth);
   }
 
   // printf("Opening file: \n\n\n\n");
@@ -220,6 +220,9 @@ int main(int argc, char* argv[]){
   // printf("\n");
 
 
+
+  // std::ofstream file;
+  // file.open("variables.txt");
 
   printf("cuts = [");
   for(int i = 0; i < numberCuts; i++){

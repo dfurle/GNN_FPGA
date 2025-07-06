@@ -17,3 +17,6 @@ rename.sh
 py_*.txt
 py_*.png
 *.csv
+.venv
+FPGA_MODEL/
+fpga_stats/

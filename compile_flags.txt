@@ -1,10 +1,11 @@
 -I/opt/xilinx/xrt/include
 -I/hdd/Xilinx/Vitis_HLS/2023.2/include/
 -I/hdd/Xilinx/Vitis_HLS/2023.2/include/etc/
--I./network/firmware
--I./network/input
--I./network/node
--I./network/edge
+-I./FPGA_MODELS/network_hd016_nlyr3_nitr1/firmware
+-I./FPGA_MODELS/network_hd016_nlyr3_nitr1/input
+-I./FPGA_MODELS/network_hd016_nlyr3_nitr1/node
+-I./FPGA_MODELS/network_hd016_nlyr3_nitr1/edge
+-I./FPGA_MODELS/network_hd016_nlyr3_nitr1/
 -I./runner
 -I.
 -xc++

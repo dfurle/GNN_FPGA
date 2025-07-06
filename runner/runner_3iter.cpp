@@ -139,34 +139,52 @@ int to_graph(data_t X[NHITS * NPARAMS], i_data_t ei[NEDGES*2]){
 }
 #endif
 
+
+void network_pass(int valid_edges, par_t H_in[NHITS], par_t H_out[NHITS], i_data_t ei_in[NEDGES*2], i_data_t ei_out[NEDGES*2]){
+
+  // // is a global copy, but needs to be flowed
+  // i_data_t ei[NEDGES*2];
+  // #pragma HLS ARRAY_PARTITION variable=ei complete
+
+  // not needed between different passes
+  par_t inbound[NEDGES];
+  par_t outbound[NEDGES];
+  #pragma HLS ARRAY_PARTITION variable=inbound complete
+  #pragma HLS ARRAY_PARTITION variable=outbound complete
+  // only used in final output
+
+  edge_network(H_in, ei_in, inbound, outbound);
+  node_network(H_in, H_out, inbound, outbound);
+
+  for(int i = 0; i < 2*NEDGES; i++){
+    #pragma HLS UNROLL
+    ei_out[i] = ei_in[i];
+  }
+
+}
+
+
+
 extern "C"{
 
-void read_X_data(hls::stream<data_t>& in_X_stream, data_t X[NHITS * NPARAMS]){
+
+void runGraphNetwork(hls::stream<data_t>& in_X_stream, hls::stream<i_data_t>& in_ei_stream, hls::stream<data_t>& out_e_stream){
+  #ifdef RUN_PIPELINE
+  #pragma HLS DATAFLOW
+  #endif
+  // #pragma HLS INLINE off
+
+  data_t X[NHITS * NPARAMS];
+  #pragma HLS ARRAY_PARTITION variable=X complete
   for(int i = 0; i < NHITS * NPARAMS; i++){
     #pragma HLS PIPELINE
     X[i] = in_X_stream.read();
   }
-}
 
-void read_ei_data(hls::stream<i_data_t>& in_ei_stream, i_data_t ei[NEDGES*2], int& valid_edges_ref){
+  printf("\n\n\n\n\n\n");
+  printf("Starting to_graph()\n");
 
-  #ifndef USE_TO_GRAPH
-
-  int valid_edges = 0;
-  for(int i = 0; i < NEDGES * 2; i++){
-    #pragma HLS PIPELINE
-    ei[i] = in_ei_stream.read();
-    if(ei[i] == i_data_t(-1) && valid_edges == 0){
-      valid_edges = i/2;
-      // keep reading stream to finish
-    }
-  }
-  if(valid_edges == 0){
-    valid_edges = NEDGES;
-  }
-  valid_edges_ref = valid_edges;
-  #else
-  // this is not edited yet properly!!!
+  #ifdef USE_TO_GRAPH
   i_data_t ei[NEDGES*2];
   #pragma HLS ARRAY_PARTITION variable=ei complete
   int valid_edges = to_graph(X, ei);
@@ -203,73 +221,49 @@ void read_ei_data(hls::stream<i_data_t>& in_ei_stream, i_data_t ei[NEDGES*2], in
   } else {
     printf("\n\n SOME FAILED \n\n\n");
   }
-  #endif
-}
 
-
-void runGraphNetwork(hls::stream<data_t>& in_X_stream, hls::stream<i_data_t>& in_ei_stream, hls::stream<data_t>& out_e_stream){
-  #ifdef RUN_PIPELINE
-  // #pragma HLS DATAFLOW
-  #endif
-  // #pragma HLS INLINE off
-
-  data_t X[NHITS * NPARAMS];
-  #pragma HLS ARRAY_PARTITION variable=X complete
+  #else
+  int valid_edges = 0;
   i_data_t ei[NEDGES*2];
   #pragma HLS ARRAY_PARTITION variable=ei complete
-
-  int valid_edges = 0;
-  read_X_data(in_X_stream, X);
-  read_ei_data(in_ei_stream, ei, valid_edges);
-
+  for(int i = 0; i < NEDGES * 2; i++){
+    #pragma HLS PIPELINE
+    ei[i] = in_ei_stream.read();
+    if(ei[i] == i_data_t(-1) && valid_edges == 0){
+      valid_edges = i/2;
+      // keep reading stream to finish
+    }
+  }
+  if(valid_edges == 0){
+    valid_edges = NEDGES;
+  }
+  #endif
 
   data_t e[NEDGES];
   #pragma HLS ARRAY_PARTITION variable=e complete
 
+  #ifdef RUN_PIPELINE
   par_t H_0[NHITS];
   #pragma HLS ARRAY_PARTITION variable=H_0 complete
   par_t H_1[NHITS];
   #pragma HLS ARRAY_PARTITION variable=H_1 complete
-
-#ifdef RUN_PIPELINE
-
-  // printf("X:\n");
-  // for(int i = 0; i < NHITS; i++){
-  //   for(int j = 0; j < NPARAMS; j++){
-  //     printf("%6.2f, ", float(X[NPARAMS*i+j]));
-  //   }
-  //   printf("\n");
-  // }
-  // printf("\n");
+  par_t H_2[NHITS];
+  #pragma HLS ARRAY_PARTITION variable=H_2 complete
+  par_t H_3[NHITS];
+  #pragma HLS ARRAY_PARTITION variable=H_3 complete
 
 input:
   input_network(X, H_0);
-
-
-  // printf("H_0:\n");
-  // for(int i = 0; i < NPARHID; i++){
-  //   for(int j = 0; j < NPARHID; j++){
-  //     printf("%6.2f, ", float(H_0[i][j]));
-  //   }
-  //   printf("\n");
-  // }
 pass1:
-  // not needed between different passes
-  par_t inbound[NEDGES];
-  par_t outbound[NEDGES];
-  #pragma HLS ARRAY_PARTITION variable=inbound complete
-  #pragma HLS ARRAY_PARTITION variable=outbound complete
-  // only used in final output
-
-  edge_network(H_0, ei, inbound, outbound);
-  node_network(H_0, H_1, inbound, outbound);
-
+  network_pass(valid_edges, H_0, H_1, ei, ei);
+pass2:
+  network_pass(valid_edges, H_1, H_2, ei, ei);
+pass3:
+  network_pass(valid_edges, H_2, H_3, ei, ei);
 final:
-  edge_predictor(valid_edges, H_1, ei, e);
+  edge_predictor(valid_edges, H_3, ei, e);
 
-WRITE_OUT:
   for(int i = 0; i < NEDGES; i++){
-    #pragma HLS PIPELINE
     out_e_stream.write(e[i]);
   }
 

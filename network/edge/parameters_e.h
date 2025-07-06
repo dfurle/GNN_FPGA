@@ -1,7 +1,4 @@
-#ifndef PARAMETERS_H_EDGE
-#define PARAMETERS_H_EDGE
-
-
+#pragma once
 #include "ap_fixed.h"
 #include "ap_int.h"
 
@@ -14,50 +11,45 @@
 #include "nnet_utils/nnet_dense_compressed.h"
 #include "nnet_utils/nnet_dense_stream.h"
 
-namespace edge_net{
-
 // hls-fpga-machine-learning insert weights
-#define __SYNTHESIS__
-#include "weights_e/w1.h"
-#include "weights_e/b1.h"
+namespace edge_net{
 #include "weights_e/w2.h"
 #include "weights_e/b2.h"
-#include "weights_e/w3.h"
-#include "weights_e/b3.h"
 #include "weights_e/w4.h"
 #include "weights_e/b4.h"
-#undef __SYNTHESIS__
+#include "weights_e/w6.h"
+#include "weights_e/b6.h"
 
 // hls-fpga-machine-learning insert layer-config
-// dense_edge_1
+// _0_block_0
 struct config2 : nnet::dense_config {
-    static const unsigned n_in = 20;
+    static const unsigned n_in = 22;
     static const unsigned n_out = 8;
     static const unsigned io_type = nnet::io_parallel;
     static const unsigned strategy = nnet::latency;
     static const unsigned reuse_factor = 1;
     static const unsigned n_zeros = 0;
-    static const unsigned n_nonzeros = 160;
+    static const unsigned n_nonzeros = 176;
     static const unsigned multiplier_limit = DIV_ROUNDUP(n_in * n_out, reuse_factor) - n_zeros / reuse_factor;
     static const bool store_weights_in_bram = false;
     typedef model_default_t accum_t;
-    typedef dense_edge_1_bias_t bias_t;
-    typedef dense_edge_1_weight_t weight_t;
+    typedef model_default_t bias_t;
+    typedef model_default_t weight_t;
     typedef layer2_index index_t;
     template<class x_T, class y_T>
     using product = nnet::product::mult<x_T, y_T>;
 };
 
-// dense_edge_1_relu
-struct relu_config3 : nnet::activ_config {
+// _0_block_1
+struct ReLU_config3 : nnet::activ_config {
     static const unsigned n_in = 8;
     static const unsigned table_size = 1024;
     static const unsigned io_type = nnet::io_parallel;
     static const unsigned reuse_factor = 1;
-    typedef dense_edge_1_relu_table_t table_t;
+    typedef _0_block_1_table_t table_t;
 };
 
-// dense_edge_2
+// _1_block_0
 struct config4 : nnet::dense_config {
     static const unsigned n_in = 8;
     static const unsigned n_out = 8;
@@ -69,52 +61,24 @@ struct config4 : nnet::dense_config {
     static const unsigned multiplier_limit = DIV_ROUNDUP(n_in * n_out, reuse_factor) - n_zeros / reuse_factor;
     static const bool store_weights_in_bram = false;
     typedef model_default_t accum_t;
-    typedef dense_edge_2_bias_t bias_t;
-    typedef dense_edge_2_weight_t weight_t;
+    typedef model_default_t bias_t;
+    typedef model_default_t weight_t;
     typedef layer4_index index_t;
     template<class x_T, class y_T>
     using product = nnet::product::mult<x_T, y_T>;
 };
 
-// dense_edge_2_relu
-struct relu_config5 : nnet::activ_config {
+// _1_block_1
+struct ReLU_config5 : nnet::activ_config {
     static const unsigned n_in = 8;
     static const unsigned table_size = 1024;
     static const unsigned io_type = nnet::io_parallel;
     static const unsigned reuse_factor = 1;
-    typedef dense_edge_2_relu_table_t table_t;
+    typedef _1_block_1_table_t table_t;
 };
 
-// dense_edge_3
+// _2_block_0
 struct config6 : nnet::dense_config {
-    static const unsigned n_in = 8;
-    static const unsigned n_out = 8;
-    static const unsigned io_type = nnet::io_parallel;
-    static const unsigned strategy = nnet::latency;
-    static const unsigned reuse_factor = 1;
-    static const unsigned n_zeros = 0;
-    static const unsigned n_nonzeros = 64;
-    static const unsigned multiplier_limit = DIV_ROUNDUP(n_in * n_out, reuse_factor) - n_zeros / reuse_factor;
-    static const bool store_weights_in_bram = false;
-    typedef model_default_t accum_t;
-    typedef dense_edge_3_bias_t bias_t;
-    typedef dense_edge_3_weight_t weight_t;
-    typedef layer6_index index_t;
-    template<class x_T, class y_T>
-    using product = nnet::product::mult<x_T, y_T>;
-};
-
-// dense_edge_3_relu
-struct relu_config7 : nnet::activ_config {
-    static const unsigned n_in = 8;
-    static const unsigned table_size = 1024;
-    static const unsigned io_type = nnet::io_parallel;
-    static const unsigned reuse_factor = 1;
-    typedef dense_edge_3_relu_table_t table_t;
-};
-
-// dense_edge_out
-struct config8 : nnet::dense_config {
     static const unsigned n_in = 8;
     static const unsigned n_out = 1;
     static const unsigned io_type = nnet::io_parallel;
@@ -125,22 +89,21 @@ struct config8 : nnet::dense_config {
     static const unsigned multiplier_limit = DIV_ROUNDUP(n_in * n_out, reuse_factor) - n_zeros / reuse_factor;
     static const bool store_weights_in_bram = false;
     typedef model_default_t accum_t;
-    typedef dense_edge_out_bias_t bias_t;
-    typedef dense_edge_out_weight_t weight_t;
-    typedef layer8_index index_t;
+    typedef model_default_t bias_t;
+    typedef model_default_t weight_t;
+    typedef layer6_index index_t;
     template<class x_T, class y_T>
     using product = nnet::product::mult<x_T, y_T>;
 };
 
-// dense_edge_out_sigmoid
-struct sigmoid_config9 : nnet::activ_config {
+// _2_block_1
+struct Sigmoid_config7 : nnet::activ_config {
     static const unsigned n_in = 1;
     static const unsigned table_size = 1024;
     static const unsigned io_type = nnet::io_parallel;
     static const unsigned reuse_factor = 1;
-    typedef dense_edge_out_sigmoid_table_t table_t;
+    typedef _2_block_1_table_t table_t;
 };
 
-}
 
-#endif
+}

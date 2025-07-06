@@ -4,193 +4,308 @@
 
 #include "projectDefines.h"
 
-#include <iostream>
+// #include <iostream>
 
-/**
- * 
- * TODO: figure out these messages and how to control them
- *  - Multiple burst reads of length 25 and bit width 128 has been inferred on bundle 'aximm1'. These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings.
- *  - The II Violation in module 'edge_network_1_Pipeline_EDGE_EDGE_LOOP' (loop 'EDGE_EDGE_LOOP'): Unable to schedule bus request operation ('aximm1_load_395_req', /home/denis/UBUNTU_TEST/graph_network/network/edge/myproject_e.cpp:75) on port 'aximm1' (/home/denis/UBUNTU_TEST/graph_network/network/edge/myproject_e.cpp:75) due to limited memory ports (II = 256). Please consider using a memory core with more ports or partitioning the array.
- *  - Automatically inferring inferring RAM_1WNR storage type for array 'Ri'. Use bind_storage pragma to override this type.
- * 
- * 
- * Figure out what this is using vitis analyzer---
- *     + runGraphNetwork_Pipeline_VITIS_LOOP_28_1                              |       -|   2.87|        -|          -|         -|        -|     -|        no|         -|           -|     67 (~0%)|    171 (~0%)|    -|
-    |   o VITIS_LOOP_28_1                                                      |       -|   4.40|        -|          -|         1|        1|     -|       yes|         -|           -|            -|            -|    -|
-    |  + runGraphNetwork_Pipeline_VITIS_LOOP_28_11                             |       -|   2.87|        -|          -|         -|        -|     -|        no|         -|           -|     67 (~0%)|    171 (~0%)|    -|
-    |   o VITIS_LOOP_28_1                                                      |       -|   4.40|        -|          -|         1|        1|     -|       yes|         -|           -|            -|            -|    -|
-    |  + runGraphNetwork_Pipeline_VITIS_LOOP_28_12                             |       -|   2.87|        -|          -|         -|        -|     -|        no|         -|           -|     67 (~0%)|    171 (~0%)|    -|
-    |   o VITIS_LOOP_28_1                                                      |       -|   4.40|        -|          -|         1|        1|     -|       yes|         -|           -|            -|            -|    -|
-    |  + runGraphNetwork_Pipeline_VITIS_LOOP_28_13                             |       -|   2.87|        -|          -|         -|        -|     -|        no|         -|           -|     67 (~0%)|    171 (~0%)|    -|
-    |   o VITIS_LOOP_28_1   
- * 
- * 
- */
+#define RUN_PIPELINE
 
-// #define RUN_PIPELINE
+// #define THETA_MAX_LONG data_t(0.700)   // 35deg
+// #define THETA_MAX_SHORT data_t(1.19175)   // 50 deg
+// #define MAX_DIST data_t(80)
+// #define DIST_LAYER data_t(5.5)
+// #define SIZE_LAYER data_t(15)
+// #define DIST_MODULE_1_2_3 data_t(55)
+// #define DIST_MODULE_3_4 data_t(33.5)
+// #define DIST_INTERLAYER data_t(7.33)
+// #define Z_275_SPLIT data_t(275)
 
+// #define USE_TO_GRAPH
+
+#ifdef USE_TO_GRAPH
+
+#define THETA_MAX_LONG 0.49   // tan(35deg)^2 = (0.7)^2
+#define THETA_MAX_SHORT 1.420268   // tan(50 deg)^2 = (1.19175)^2
+#define MAX_DIST 6400  // 80^2
+#define DIST_LAYER 5.5
+#define SIZE_LAYER 15.0
+#define DIST_MODULE_1_2_3 54.0
+#define DIST_MODULE_3_4 33.5
+#define DIST_INTERLAYER 7.33
+#define Z_275_SPLIT 99.0 // 275 - 176
+
+// seems to be very intensive if not completely unrolled
+// but if completely unrolled, does not compile (high resource probably)
+// will attempt a full compilation on jlab servers (compilation required more than my 32GB ram)
+//  - usually will end up using more FPGA resoruces than available
+// possiblility to split up NN and graph builder
+//  - 1st FPGA does graph building, (need more time to optimize), streams to next fpga
+//  - 2nd FPGA intakes the build graphs, has II of ~2.8us, already built
+//  - likely no time lost, only time lost due to bulk streaming read in/out which is fairly small
+// Another possible algorithm: run network during graph building
+//  - select node, connect all possible nodes, run network on that node
+//  - seems like a very slight optimization, might not work still though...
+//  - since we now need to aggregate (or even run) on same edge multiple times?
+//  May be bad due to bad array writing
+//  - write into NHITS*NHITS array, and then rewrite into smaller? idk if better or not
+
+
+int to_graph(data_t X[NHITS * NPARAMS], i_data_t ei[NEDGES*2]){
+
+  int counter = 0;
+  for(int i = 0; i < NEDGES*2; i++){
+    #pragma HLS UNROLL
+    ei[i] = i_data_t(-1);
+  }
+  
+
+  for(int i = 0; i < NHITS; i++){
+    #pragma HLS PIPELINE off
+    data_t hit1_x = X[NPARAMS*i+0];
+    data_t hit1_y = X[NPARAMS*i+1];
+    data_t hit1_z = X[NPARAMS*i+2];
+    for(int j = 0; j < NHITS; j++){
+      // #pragma HLS PIPELINE
+      #pragma HLS UNROLL
+      if(counter >= NEDGES)
+        break;
+      data_t hit2_x = X[NPARAMS*j+0];
+      data_t hit2_y = X[NPARAMS*j+1];
+      data_t hit2_z = X[NPARAMS*j+2];
+
+      // float hit1_x = X[NPARAMS*i+0];
+      // float hit1_y = X[NPARAMS*i+1];
+      // float hit1_z = X[NPARAMS*i+2];
+      // float hit2_x = X[NPARAMS*j+0];
+      // float hit2_y = X[NPARAMS*j+1];
+      // float hit2_z = X[NPARAMS*j+2];
+      if(hit1_z == 0)
+        continue;
+      if(hit2_z == 0)
+        continue;
+
+      data_t diff_x = hit2_x - hit1_x;
+      data_t diff_y = hit2_y - hit1_y;
+      data_t diff_z = hit2_z - hit1_z;
+      data_t xy_mag2 = diff_x*diff_x + diff_y*diff_y;
+      // data_t dist = xy_mag + diff_z*diff_z;
+
+      // float diff_x = hit2_x - hit1_x;
+      // float diff_y = hit2_y - hit1_y;
+      // float diff_z = hit2_z - hit1_z;
+      // float xy_mag = sqrt(diff_x*diff_x + diff_y*diff_y);
+      // float dist = xy_mag*xy_mag + diff_z*diff_z;
+
+      // printf("Edge %4d | {%3d, %3d}\n", counter, i, j);
+      // printf("  Hit1 %3d\n", i);
+      // printf("    %5.3f, %5.3f, %5.3f\n", float(hit1_x), float(hit1_y), float(hit1_z));
+      // printf("  Hit2 %3d\n", j);
+      // printf("    %5.3f, %5.3f, %5.3f\n", float(hit2_x), float(hit2_y), float(hit2_z));
+      // printf("  Diff:\n");
+      // printf("    %5.3f, %5.3f, %5.3f\n", float(diff_x), float(diff_y), float(diff_z));
+      // printf("  Mag XY: %5.3f\n", float(xy_mag));
+      // printf("  Mag XYZ: %5.3f\n", float(dist));
+      if(diff_z <= 0)
+        continue;
+      // data_t theta = abs(float(xy_mag / diff_z));
+      data_t theta = xy_mag2 / (diff_z*diff_z);
+      if(theta < 0)
+        theta = -theta;
+      // printf("  Theta: %5.3f\n", float(theta));
+
+      if(diff_z >= DIST_LAYER && theta > THETA_MAX_LONG)
+        continue;
+      if(diff_z < DIST_LAYER && theta > THETA_MAX_SHORT)
+        continue;
+      // if(dist > MAX_DIST || dist < 0)
+      //   continue;
+      if(diff_z < SIZE_LAYER and diff_z > DIST_INTERLAYER)
+        continue;
+      if(diff_z > SIZE_LAYER){
+        if(hit1_z < Z_275_SPLIT && diff_z > DIST_MODULE_1_2_3)
+          continue;
+        if(hit1_z >= Z_275_SPLIT && diff_z > DIST_MODULE_3_4)
+          continue;
+      }
+      
+      // printf("  !! Passed !!\n");
+      ei[2*counter] = i;
+      ei[2*counter+1] = j;
+      counter++;
+      // printf("\n");
+    }
+    if(counter >= NEDGES)
+      break;
+  }
+  return counter;
+}
+#endif
 
 extern "C"{
 
+void read_X_data(hls::stream<data_t>& in_X_stream, data_t X[NHITS * NPARAMS]){
+  for(int i = 0; i < NHITS * NPARAMS; i++){
+    #pragma HLS PIPELINE
+    X[i] = in_X_stream.read();
+  }
+}
 
-// void runIteration(par_t H_0[NHITS], ei_t ei_0, int valid_edges){
-//   par_t H_1[NHITS];
-//   data_t e_1[NEDGES];
-//   ei_t ei_1 = ei_0;
-//   edge_network(H_0, ei_1, e_1, valid_edges);
-//   node_network(H_0, ei_1, e_1, H_1);
-// }
+void read_ei_data(hls::stream<i_data_t>& in_ei_stream, i_data_t ei[NEDGES*2], int& valid_edges_ref){
 
+  #ifndef USE_TO_GRAPH
 
-void runGraphNetwork(data_t X_arr[NHITS * NPARAMS], i_data_t edge_i_arr[NEDGES * 2], data_t e_arr[NEDGES], int valid_edges){
-  #pragma HLS PIPELINE
-  // #pragma HLS INLINE off
+  int valid_edges = 0;
+  for(int i = 0; i < NEDGES * 2; i++){
+    #pragma HLS PIPELINE
+    ei[i] = in_ei_stream.read();
+    if(ei[i] == i_data_t(-1) && valid_edges == 0){
+      valid_edges = i/2;
+      // keep reading stream to finish
+    }
+  }
+  if(valid_edges == 0){
+    valid_edges = NEDGES;
+  }
+  valid_edges_ref = valid_edges;
+  #else
+  // this is not edited yet properly!!!
+  i_data_t ei[NEDGES*2];
+  #pragma HLS ARRAY_PARTITION variable=ei complete
+  int valid_edges = to_graph(X, ei);
 
-  ei_t ei_arr;
-  for(int i = 0; i < NEDGES; i++){
-    #pragma HLS UNROLL
-    ei_arr[i] = edge_i_arr[i];
+  printf("Finished to_graph()\n");
+
+  int valid_edges_true = 0;
+  i_data_t ei_true[NEDGES*2];
+  #pragma HLS ARRAY_PARTITION variable=ei_true complete
+  for(int i = 0; i < NEDGES * 2; i++){
+    #pragma HLS PIPELINE
+    ei_true[i] = in_ei_stream.read();
+    if(ei_true[i] == i_data_t(-1) && valid_edges_true == 0){
+      valid_edges_true = i/2;
+      // keep reading stream to finish
+    }
+  }
+  if(valid_edges_true == 0){
+    valid_edges_true = NEDGES;
   }
 
-  #ifndef RUN_PIPELINE
+  printf("EI True | EI Built\n");
+  int num_correct = 0;
+  for(int i = 0; i < NEDGES; i++){
+    printf(" [%5d %5d]  |  [%5d %5d]", int(ei_true[2*i]), int(ei_true[2*i+1]), int(ei[2*i]), int(ei[2*i+1]));
+    if(ei_true[2*i] == ei[2*i] && ei_true[2*i+1] == ei[2*i+1])
+      num_correct += 1;
+    else
+      printf(" !");
+    printf("\n");
+  }
+  if(num_correct == NEDGES){
+    printf("\n\n ALL CORRECT \n\n\n");
+  } else {
+    printf("\n\n SOME FAILED \n\n\n");
+  }
+  #endif
+}
+
+
+void runGraphNetwork(hls::stream<data_t>& in_X_stream, hls::stream<i_data_t>& in_ei_stream, hls::stream<data_t>& out_e_stream){
+  #ifdef RUN_PIPELINE
+  // #pragma HLS DATAFLOW
+  #endif
+  // #pragma HLS INLINE off
+
+  data_t X[NHITS * NPARAMS];
+  #pragma HLS ARRAY_PARTITION variable=X complete
+  i_data_t ei[NEDGES*2];
+  #pragma HLS ARRAY_PARTITION variable=ei complete
+
+  int valid_edges = 0;
+  read_X_data(in_X_stream, X);
+  read_ei_data(in_ei_stream, ei, valid_edges);
+
+
+  data_t e[NEDGES];
+  #pragma HLS ARRAY_PARTITION variable=e complete
+
   par_t H_0[NHITS];
   #pragma HLS ARRAY_PARTITION variable=H_0 complete
   par_t H_1[NHITS];
   #pragma HLS ARRAY_PARTITION variable=H_1 complete
 
+#ifdef RUN_PIPELINE
+
+  // printf("X:\n");
+  // for(int i = 0; i < NHITS; i++){
+  //   for(int j = 0; j < NPARAMS; j++){
+  //     printf("%6.2f, ", float(X[NPARAMS*i+j]));
+  //   }
+  //   printf("\n");
+  // }
+  // printf("\n");
+
 input:
-  input_network(X_arr, H_0);
-  
+  input_network(X, H_0);
+
+
+  // printf("H_0:\n");
+  // for(int i = 0; i < NPARHID; i++){
+  //   for(int j = 0; j < NPARHID; j++){
+  //     printf("%6.2f, ", float(H_0[i][j]));
+  //   }
+  //   printf("\n");
+  // }
 pass1:
-  edge_network(H_0, ei_arr, e_arr, valid_edges);
-  node_network(H_0, ei_arr, e_arr, H_1);
+  // not needed between different passes
+  par_t inbound[NEDGES];
+  par_t outbound[NEDGES];
+  #pragma HLS ARRAY_PARTITION variable=inbound complete
+  #pragma HLS ARRAY_PARTITION variable=outbound complete
+  // only used in final output
 
-pass2:
-  edge_network(H_1, ei_arr, e_arr, valid_edges);
-  node_network(H_1, ei_arr, e_arr, H_0);
-
-pass3:
-  edge_network(H_0, ei_arr, e_arr, valid_edges);
-  node_network(H_0, ei_arr, e_arr, H_1);
+  edge_network(H_0, ei, inbound, outbound);
+  node_network(H_0, H_1, inbound, outbound);
 
 final:
-  edge_network(H_1, ei_arr, e_arr, valid_edges);
-
-  #else
-  // INPUT
-  par_t H_0[NHITS];
-  ei_t ei_0 = ei_arr;
-  input_network(X_arr, H_0);
-
-  // ITER #1
-  par_t H_1[NHITS];
-  data_t e_1[NEDGES];
-  ei_t ei_1 = ei_0;
-  edge_network(H_0, ei_1, e_1, valid_edges);
-  node_network(H_0, ei_1, e_1, H_1);
-  
-
-  // // ITER #2
-  // par_t H_2[NHITS];
-  // data_t e_2[NEDGES];
-  // ei_t ei_2 = ei_1;
-  // edge_network(H_1, ei_2, e_2, valid_edges);
-  // node_network(H_1, ei_2, e_2, H_2);
-
-  // // ITER #3
-  // par_t H_3[NHITS];
-  // data_t e_3[NEDGES];
-  // ei_t ei_3 = ei_2;
-  // edge_network(H_2, ei_3, e_3, valid_edges);
-  // node_network(H_2, ei_3, e_3, H_3);
-
-  // ENDING
-  edge_network(H_1, ei_1, e_arr, valid_edges);
-  // edge_network(H_3, ei_3, e_arr, valid_edges);
-  #endif
-}
-
-
-void runner(data_t X_arr[NHITS * NPARAMS], i_data_t edge_index_arr[NEDGES * 2], data_t e_arr[NEDGES]){
-  // #pragma HLS DATAFLOW
-  #pragma HLS INTERFACE m_axi port=X_arr  offset=slave bundle=aximm1
-  #pragma HLS INTERFACE m_axi port=edge_index_arr offset=slave bundle=aximm1
-  #pragma HLS INTERFACE m_axi port=e_arr  offset=slave bundle=aximm1
-  // #pragma HLS INTERFACE s_axilite port=X_arr  bundle=control
-  // #pragma HLS INTERFACE s_axilite port=Ro_arr bundle=control
-  // #pragma HLS INTERFACE s_axilite port=Ri_arr bundle=control
-  // #pragma HLS INTERFACE s_axilite port=e_arr  bundle=control
-  // #pragma HLS INTERFACE s_axilite port=return bundle=control
-
-  // #pragma HLS ARRAY_RESHAPE variable = X_arr complete dim = 0
-  // #pragma HLS ARRAY_RESHAPE variable = Ro_arr complete dim = 0
-  // #pragma HLS ARRAY_RESHAPE variable = Ri_arr complete dim = 0
-  // #pragma HLS ARRAY_RESHAPE variable = e_arr complete dim = 0
-
-  // par_t read_H_arr[NHITS];
-  // // #pragma HLS ARRAY_PARTITION variable=read_H_arr cyclic factor=NPARHID
-  // par_t read_H2_arr[NHITS];
-  // // #pragma HLS ARRAY_PARTITION variable=read_H2_arr cyclic factor=NPARHID
-
-
-  data_t read_X_arr[NHITS * NPARAMS];
-  i_data_t read_edge_index_arr[NEDGES * 2];
-  data_t read_e_arr[NEDGES];
-  #pragma HLS ARRAY_PARTITION variable=read_X_arr block factor=NHITS
-  #pragma HLS ARRAY_PARTITION variable=read_edge_index_arr block factor=NEDGES
-  #pragma HLS ARRAY_PARTITION variable=read_e_arr complete
-
-READ_IN1_HITS:
-  for(int i = 0; i < NHITS; i++){
-    #pragma HLS unroll factor=1
-    for(int j = 0; j < NPARAMS; j++){
-      #pragma HLS unroll factor=1
-      read_X_arr[i*NPARAMS + j] = X_arr[i*NPARAMS + j];
-    }
-  }
-
-  int valid_edges = 0;
-
-READ_IN_EDGE:
-  for(int i = 0; i < NEDGES; i++){
-    #pragma HLS unroll factor=1
-    read_edge_index_arr[i*2] = edge_index_arr[i*2];
-    read_edge_index_arr[i*2+1] = edge_index_arr[i*2+1];
-    if(edge_index_arr[i*2] == i_data_t(-1) && valid_edges == 0)
-      valid_edges = i;
-  }
-
-  runGraphNetwork(read_X_arr, read_edge_index_arr, read_e_arr, valid_edges);
-
-
-  // par_t H_0[NHITS];
-  // #pragma HLS ARRAY_PARTITION variable=H_0 complete
-  // par_t H_1[NHITS];
-  // #pragma HLS ARRAY_PARTITION variable=H_1 complete
-
-  // input_network(X_arr, H_0);
-
-  // edge_network(H_0, read_edge_index_arr, read_e_arr, valid_edges);
-
-  // node_network(H_0, read_edge_index_arr, read_e_arr, H_1);
-
-  // edge_network(H_1, read_edge_index_arr, read_e_arr, valid_edges);
-  // node_network(H_1, read_edge_index_arr, read_e_arr, H_0);
-
-  // edge_network(H_0, read_edge_index_arr, read_e_arr, valid_edges);
-  // node_network(H_0, read_edge_index_arr, read_e_arr, H_1);
-
-  // edge_network(H_1, read_edge_index_arr, read_e_arr, valid_edges);
-
+  edge_predictor(valid_edges, H_1, ei, e);
 
 WRITE_OUT:
   for(int i = 0; i < NEDGES; i++){
-    if(read_edge_index_arr[i*2] != i_data_t(-1)){
-      e_arr[i] = read_e_arr[i];
-    }else{
-      e_arr[i] = data_t(0.0);
-    }
+    #pragma HLS PIPELINE
+    out_e_stream.write(e[i]);
   }
+
+  #else
+
+  par_t H_0[NHITS];
+  #pragma HLS ARRAY_PARTITION variable=H_0 complete
+  par_t H_1[NHITS];
+  #pragma HLS ARRAY_PARTITION variable=H_1 complete
+
+  // par_t inbound[NEDGES];
+  // par_t outbound[NEDGES];
+  // #pragma HLS ARRAY_PARTITION variable=inbound complete
+  // #pragma HLS ARRAY_PARTITION variable=outbound complete
+
+input:
+  input_network(X, H_0);
+pass1:
+  network_pass(valid_edges, H_0, H_1, ei, ei);
+pass2:
+  network_pass(valid_edges, H_1, H_0, ei, ei);
+pass3:
+  network_pass(valid_edges, H_0, H_1, ei, ei);
+final:
+  edge_predictor(valid_edges, H_1, ei, e);
+
+  for(int i = 0; i < NEDGES; i++){
+    out_e_stream.write(e[i]);
+  }
+
+  // 812s   <- with the inbound unrolled?
+  // 921s   <- current
+
+  #endif
+
+
 }
 
 }

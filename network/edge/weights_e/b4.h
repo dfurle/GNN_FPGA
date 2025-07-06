@@ -1,4 +1,9 @@
-#ifndef B4_H_
-#define B4_H_
-dense_edge_out_bias_t b4[1] = {0.09871405};
-#endif
+//Numpy array shape [8]
+//Min 0.033543780446
+//Max 0.466561228037
+//Number of zeros 0
+
+#pragma once
+
+model_default_t b4[8] = {0.4665612280, 0.2473686785, 0.2756890059, 0.0335437804, 0.3242240846, 0.2874405682, 0.0847354308, 0.3795596063};
+

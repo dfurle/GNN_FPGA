@@ -15,15 +15,15 @@ LDFLAGS += -lxilinxopencl
 # LDFLAGS += -pthread   #doesnt seem to be needed, but if anything breaks try uncomment this first!
 
 
-INPUT_DIR := ${WORK}/network/input
+INPUT_DIR := ${WORK}/FPGA_MODEL/input
 INPUT_SRC := ${INPUT_DIR}/myproject_i.cpp
 # INPUT_INCLUDE := -I${INPUT_DIR}
 	
-EDGE_DIR := ${WORK}/network/edge
+EDGE_DIR := ${WORK}/FPGA_MODEL/edge
 EDGE_SRC := ${EDGE_DIR}/myproject_e.cpp
 # EDGE_INCLUDE := -I${EDGE_DIR}
 
-NODE_DIR := ${WORK}/network/node
+NODE_DIR := ${WORK}/FPGA_MODEL/node
 NODE_SRC := ${NODE_DIR}/myproject_n.cpp
 # NODE_INCLUDE := -I${NODE_DIR}
 

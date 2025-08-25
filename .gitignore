@@ -18,5 +18,5 @@ py_*.txt
 py_*.png
 *.csv
 .venv
-FPGA_MODEL/
+FPGA_MODEL_*
 fpga_stats/

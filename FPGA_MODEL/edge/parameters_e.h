@@ -12,24 +12,25 @@
 #include "nnet_utils/nnet_dense_stream.h"
 
 // hls-fpga-machine-learning insert weights
-namespace input_net{
-#include "weights_i/w2.h"
-#include "weights_i/b2.h"
-#include "weights_i/w4.h"
-#include "weights_i/b4.h"
-#include "weights_i/w6.h"
-#include "weights_i/b6.h"
+namespace edge_net{
+#include "weights_e/w2.h"
+#include "weights_e/b2.h"
+#include "weights_e/w4.h"
+#include "weights_e/b4.h"
+#include "weights_e/w6.h"
+#include "weights_e/b6.h"
+
 
 // hls-fpga-machine-learning insert layer-config
 // _0_block_0
 struct config2 : nnet::dense_config {
-    static const unsigned n_in = 3;
+    static const unsigned n_in = 22;
     static const unsigned n_out = 8;
     static const unsigned io_type = nnet::io_parallel;
     static const unsigned strategy = nnet::latency;
     static const unsigned reuse_factor = 1;
     static const unsigned n_zeros = 0;
-    static const unsigned n_nonzeros = 24;
+    static const unsigned n_nonzeros = 176;
     static const unsigned multiplier_limit = DIV_ROUNDUP(n_in * n_out, reuse_factor) - n_zeros / reuse_factor;
     static const bool store_weights_in_bram = false;
     typedef model_default_t accum_t;
@@ -80,12 +81,12 @@ struct ReLU_config5 : nnet::activ_config {
 // _2_block_0
 struct config6 : nnet::dense_config {
     static const unsigned n_in = 8;
-    static const unsigned n_out = 8;
+    static const unsigned n_out = 1;
     static const unsigned io_type = nnet::io_parallel;
     static const unsigned strategy = nnet::latency;
     static const unsigned reuse_factor = 1;
     static const unsigned n_zeros = 0;
-    static const unsigned n_nonzeros = 64;
+    static const unsigned n_nonzeros = 8;
     static const unsigned multiplier_limit = DIV_ROUNDUP(n_in * n_out, reuse_factor) - n_zeros / reuse_factor;
     static const bool store_weights_in_bram = false;
     typedef model_default_t accum_t;
@@ -97,8 +98,8 @@ struct config6 : nnet::dense_config {
 };
 
 // _2_block_1
-struct ReLU_config7 : nnet::activ_config {
-    static const unsigned n_in = 8;
+struct Sigmoid_config7 : nnet::activ_config {
+    static const unsigned n_in = 1;
     static const unsigned table_size = 1024;
     static const unsigned io_type = nnet::io_parallel;
     static const unsigned reuse_factor = 1;

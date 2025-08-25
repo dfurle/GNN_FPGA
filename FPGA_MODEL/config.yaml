@@ -1,0 +1,132 @@
+dataparser_config:
+  dataparser_id: CSVParser_v0
+  # filepaths: ./2025_ahmed_model/data/four_tracks_with_background_with_wire_numbers_cleaned_positive_and_negative_tracks.csv.gz
+  filepaths: ./2025_ahmed_model/data/four_tracks_with_background_with_wire_numbers_cleaned_positive_and_negative_tracks.csv.gz
+  read_kwargs:
+    compression: gzip
+    dtype:
+      evtid: i8
+      track_number: i4
+      wire_number: i4
+      x: f4
+      y: f4
+      z: f4
+hitgraph_config:
+  abs_dphi_max: 1.5
+  call_mask_tracks: true
+  dist_max: 2410
+  feature_names:
+  - r
+  - phi
+  - z
+  feature_scales:
+  - - 0
+    - 50.0
+  - - -3.141592653589793
+    - 3.141592653589793
+  - - 176
+    - 344
+  graph_dtypes:
+    label: f4
+    layer: i4
+    num_hits_per_graph: i4
+  hitgraph_builder_id: numpy_graph_builder
+  layers_z_limits:
+  - - 176
+    - 178
+  - - 178
+    - 180
+  - - 180
+    - 182
+  - - 182
+    - 184
+  - - 184
+    - 186
+  - - 186
+    - 190
+  - - 233
+    - 236
+  - - 236
+    - 238
+  - - 238
+    - 241
+  - - 241
+    - 243
+  - - 243
+    - 245
+  - - 245
+    - 248
+  - - 293
+    - 295
+  - - 295
+    - 297
+  - - 297
+    - 300
+  - - 300
+    - 302
+  - - 302
+    - 304
+  - - 304
+    - 306
+  - - 330
+    - 334
+  - - 334
+    - 336
+  - - 336
+    - 338
+  - - 338
+    - 340
+  - - 340
+    - 342
+  - - 342
+    - 344
+  max_skip: 3
+  phi_slope_max: 0.9
+  save_loc: ./data/2025_ahmed_model/data/
+  true_label_negative_tracks: true
+  true_label_positive_tracks: true
+  true_label_zero_tracks: false
+model_config:
+  activation: relu
+  batch_size: 512
+  edge_network_config:
+    activation: relu
+    hidden_dim: 8  # TODO: this  hidden
+    input_dim: 22   # TODO: this  parhid2
+    layernorm: false
+    n_layers: 3
+    output_activation: sigmoid
+    output_dim: 1
+    p_dropout: 0.05
+    residual: false
+  edge_network_id: torch_edge_network-v1
+  fake_edges_weight: 0.75
+  feature_names:
+  - r
+  - phi
+  - z
+  hidden_dim: 8   # TODO: this
+  input_dim: 3
+  layernorm: false
+  learning_rate: 0.001
+  model_id: torch_edge_classifier-v1
+  n_iterations: 1
+  n_layers: 3
+  node_network_config:
+    activation: relu
+    hidden_dim: 8   # TODO: this  hidden
+    input_dim: 33    # TODO: this  parhid3
+    layernorm: false
+    n_layers: 3
+    output_activation: relu
+    p_dropout: 0.05
+    residual: false
+  node_network_id: torch_node_network-v1
+  p_dropout: 0.05
+  real_edges_weight: 1
+  residual: false
+training_config:
+  early_stopping_patience: 1000
+  n_epochs: 1000
+  n_events: 200000
+  output_location: ../runs/

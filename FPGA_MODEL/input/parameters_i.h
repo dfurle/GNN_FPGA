@@ -12,24 +12,25 @@
 #include "nnet_utils/nnet_dense_stream.h"
 
 // hls-fpga-machine-learning insert weights
-namespace node_net{
-#include "weights_n/w2.h"
-#include "weights_n/b2.h"
-#include "weights_n/w4.h"
-#include "weights_n/b4.h"
-#include "weights_n/w6.h"
-#include "weights_n/b6.h"
+namespace input_net{
+#include "weights_i/w2.h"
+#include "weights_i/b2.h"
+#include "weights_i/w4.h"
+#include "weights_i/b4.h"
+#include "weights_i/w6.h"
+#include "weights_i/b6.h"
+
 
 // hls-fpga-machine-learning insert layer-config
 // _0_block_0
 struct config2 : nnet::dense_config {
-    static const unsigned n_in = 33;
+    static const unsigned n_in = 3;
     static const unsigned n_out = 8;
     static const unsigned io_type = nnet::io_parallel;
     static const unsigned strategy = nnet::latency;
     static const unsigned reuse_factor = 1;
     static const unsigned n_zeros = 0;
-    static const unsigned n_nonzeros = 264;
+    static const unsigned n_nonzeros = 24;
     static const unsigned multiplier_limit = DIV_ROUNDUP(n_in * n_out, reuse_factor) - n_zeros / reuse_factor;
     static const bool store_weights_in_bram = false;
     typedef model_default_t accum_t;
